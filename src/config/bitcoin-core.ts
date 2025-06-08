@@ -1,17 +1,6 @@
 import dotenv from 'dotenv'
+import { BitcoinCoreClientConfig } from '../types/bitcoin-core'
 dotenv.config()
-
-export interface BitcoinCoreClientConfig {
-    headers?: Record<string, string>;
-    host?: string;
-    logger?: any;
-    password?: string;
-    timeout?: number;
-    username?: string;
-    version?: string;
-    wallet?: string;
-    allowDefaultWallet?: boolean;
-}
 
 
 export const bitcoinCoreClientConfig: BitcoinCoreClientConfig = {

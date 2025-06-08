@@ -1,6 +1,5 @@
 import Client from 'bitcoin-core'
-import { BitcoinCoreClientConfig } from '../../config/bitcoin-core'
-
+import { BitcoinCoreClientConfig } from '../../types/bitcoin-core';
 
 //bcrt1qxuur0q92f9khlqm0n3rzgk5jv58q0xjct0gavr
 //bcrt1qnpl3ukkjjzk33ldgrj6gqugerfqytt902k9frv
