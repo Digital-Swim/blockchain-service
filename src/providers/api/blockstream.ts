@@ -1,15 +1,12 @@
 import axios from 'axios';
-import { blockstreamConfig } from '../../config/blockstram.js';
+import { appConfig } from '../../config.js';
 
 export class BlockstreamApiProvider {
     private baseUrl: string;
 
     constructor() {
-        const network = blockstreamConfig.network;
-        this.baseUrl =
-            network === 'testnet'
-                ? blockstreamConfig.urls.testnet
-                : blockstreamConfig.urls.mainnet;
+        const network = appConfig.network;
+        this.baseUrl = network === 'mainnet' ? appConfig.blockstream.mainnet : appConfig.blockstream.testnet;
     }
 
     async getLatestBlockHash(): Promise<string> {
