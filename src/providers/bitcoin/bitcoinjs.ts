@@ -4,7 +4,7 @@ import * as bitcoin from "bitcoinjs-lib";
 import { ECPairAPI, ECPairFactory, ECPairInterface } from "ecpair";
 import * as ecc from 'tiny-secp256k1';
 import { appConfig } from '../../config.js';
-import { BitcoinjsConfig, IBitcoinApiProvider, Utxo } from '../../types.js';
+import { BitcoinjsConfig, IBitcoinApiProvider, NetworkType, Utxo } from '../../types.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);
@@ -16,9 +16,9 @@ export class BitcoinjsProvider {
     private network: bitcoin.networks.Network;
     private api: IBitcoinApiProvider;
 
-    constructor(apiProvider: IBitcoinApiProvider, config: BitcoinjsConfig) {
+    constructor(apiProvider: IBitcoinApiProvider, network: NetworkType) {
         this.api = apiProvider;
-        this.network = appConfig.network === 'mainnet' ? bitcoin.networks.bitcoin : appConfig.network === 'testnet' ? bitcoin.networks.testnet : appConfig.network === 'regtest' ? bitcoin.networks.regtest : (() => { throw new Error(`Unsupported network: ${appConfig.network}`); })();
+        this.network = network === 'mainnet' ? bitcoin.networks.bitcoin : network === 'testnet' ? bitcoin.networks.testnet : network === 'regtest' ? bitcoin.networks.regtest : (() => { throw new Error(`Unsupported network: ${appConfig.network}`); })();
     }
 
     generateMnemonic(): string {

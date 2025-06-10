@@ -18,7 +18,7 @@ const mockApiProvider: IBitcoinApiProvider = {
     },
 };
 
-const provider = new BitcoinjsProvider(mockApiProvider, appConfig.bitcoinjs);
+const provider = new BitcoinjsProvider(mockApiProvider, appConfig.network);
 
 describe('BitcoinProvider ' + appConfig.network, () => {
 

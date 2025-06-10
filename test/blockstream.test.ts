@@ -5,7 +5,7 @@ import { appConfig } from '../src/config.js';
 describe('BlockstreamApiProvider', function () {
     this.timeout(10000);
 
-    const provider = new BlockstreamApiProvider();
+    const provider = new BlockstreamApiProvider(appConfig.network);
 
     it('should fetch the latest block hash', async () => {
         const hash = await provider.getLatestBlockHash();

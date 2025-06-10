@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { appConfig } from '../../config.js';
+import { NetworkType } from '../../types.js';
 
 export class BlockstreamApiProvider {
     private baseUrl: string;
 
-    constructor() {
-        const network = appConfig.network;
+    constructor(network: NetworkType) {
         this.baseUrl = network === 'mainnet' ? appConfig.blockstream.mainnet : appConfig.blockstream.testnet;
     }
 
