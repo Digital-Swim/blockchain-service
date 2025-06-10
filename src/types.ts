@@ -35,6 +35,13 @@ export type Utxo = {
   value: number;
 }
 
+export type BitcoinFeeRate = {
+  fastestFee: number;
+  halfHourFee: number;
+  hourFee: number;
+  economyFee?: number;
+  minimumFee?: number;
+}
 export interface IBitcoinApiProvider {
   getAddressUtxos(address: string): Promise<Utxo[]>;
   broadcastTransaction(rawTxHex: string): Promise<string>;

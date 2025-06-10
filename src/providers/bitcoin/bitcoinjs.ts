@@ -117,7 +117,7 @@ export class BitcoinjsProvider {
         toAddress: string;
         amountSats: number;
         utxos: Utxo[];
-        feeRate?: number; // Optional, sat/vByte. Default: 1 sat/vByte (for regtest)
+        feeRate?: number;
     }): Promise<string> {
         const { keyPair, toAddress, amountSats, utxos, feeRate = 1 } = params;
         const psbt = new bitcoin.Psbt({ network: this.network });

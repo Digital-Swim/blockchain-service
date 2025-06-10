@@ -1,20 +1,15 @@
 import axios from 'axios';
 import { appConfig } from '../../config.js';
+import { BitcoinFeeRate, NetworkType } from '../../types.js';
 
 export class MempoolProvider {
     private baseUrl: string;
 
-    constructor(network: 'mainnet' | 'testnet' = 'mainnet') {
-        this.baseUrl = network === 'testnet' ? appConfig.mempool.testnet : appConfig.mempool.mainnet;
+    constructor(network: NetworkType) {
+        this.baseUrl = network === 'mainnet' ? appConfig.mempool.mainnet : appConfig.mempool.testnet;
     }
 
-    async getFeeRates(): Promise<{
-        fastestFee: number;
-        halfHourFee: number;
-        hourFee: number;
-        economyFee?: number;
-        minimumFee?: number;
-    }> {
+    async getFeeRates(): Promise<BitcoinFeeRate> {
         const res = await axios.get(`${this.baseUrl}/v1/fees/recommended`);
         return res.data;
     }
