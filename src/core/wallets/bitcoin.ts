@@ -30,6 +30,10 @@ export class BitcoinWallet {
         return this.keyPair.publicKey;
     }
 
+    sign(hash:Uint8Array): Uint8Array {
+        return this.keyPair.sign(hash);
+    }
+
     getAddress(type: BitcoinAddressType = 'p2pkh'): string {
         switch (type) {
             case 'p2pkh':

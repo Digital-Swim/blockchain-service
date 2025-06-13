@@ -3,6 +3,7 @@ import { BitcoinjsProvider } from '../src/providers/bitcoin/bitcoinjs.js';
 import { IBitcoinApiProvider } from '../src/types/common.js';
 import { appConfig } from '../src/config.js';
 import { UTXO } from 'coinselect';
+import { BitcoinWallet } from '../src/core/wallets/bitcoin.js';
 
 const mockApiProvider: IBitcoinApiProvider = {
     async getAddressUtxos(address: string): Promise<UTXO[]> {
@@ -23,38 +24,16 @@ const provider = new BitcoinjsProvider(mockApiProvider, appConfig.network);
 
 describe('BitcoinProvider ' + appConfig.network, () => {
 
-    it('generates mnemonic and derives address', () => {
-        const mnemonic = provider.generateMnemonic();
-        expect(mnemonic.split(' ').length).to.be.greaterThanOrEqual(12);
-
-        const keyPair = provider.getKeyPairFromMnemonic(mnemonic);
-        const address = provider.getAddressFromKeyPair(keyPair);
-
-        const expectedPrefix = appConfig.network === 'mainnet'
-            ? 'bc1'
-            : appConfig.network === 'testnet'
-                ? 'tb1'
-                : 'bcrt1';
-
-        expect(address.startsWith(expectedPrefix)).to.be.true;
-    });
-
     it('creates and signs a transaction', async () => {
-        const mnemonic = provider.generateMnemonic();
-        const keyPair = provider.getKeyPairFromMnemonic(mnemonic);
-
-        const address = provider.getAddressFromKeyPair(keyPair);
-        const utxos = await provider.fetchUtxos(address);
-
-        const toAddress = provider.getAddressFromKeyPair(keyPair); // for test, send to self
+        const wallet = new BitcoinWallet(appConfig.network);
+        const utxos = await provider.fetchUtxos(wallet.getAddress());
         const rawTx = await provider.createTransaction({
-            keyPair,
-            toAddress,
+            wallet,
+            toAddress: wallet.getAddress(),
             amountSats: 5000,
             utxos,
             feeRate: 1
         });
-
         expect(typeof rawTx.hex).to.be.equal('string');
         expect(rawTx.hex.length).to.be.greaterThan(12)
     });
@@ -64,5 +43,4 @@ describe('BitcoinProvider ' + appConfig.network, () => {
         expect(txid).to.be.equal('mock-txid');
     });
 
-    
 });

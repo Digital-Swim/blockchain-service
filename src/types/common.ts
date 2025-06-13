@@ -1,5 +1,6 @@
 import { Target, UTXO } from "coinselect";
 import { ECPairInterface } from "ecpair";
+import { BitcoinWallet } from "../core/wallets/bitcoin";
 
 
 export type NetworkType = 'mainnet' | 'testnet' | 'regtest';
@@ -43,7 +44,7 @@ export type BitcoinFeeRate = {
 }
 
 export type BitcoinTransactionParams = {
-  keyPair: ECPairInterface;
+  wallet: BitcoinWallet;
   toAddress: string;
   amountSats: number;
   utxos?: UTXO[];
