@@ -4,7 +4,9 @@ import * as bitcoin from "bitcoinjs-lib";
 import { ECPairAPI, ECPairFactory, ECPairInterface } from "ecpair";
 import * as ecc from 'tiny-secp256k1';
 import { appConfig } from '../../config.js';
-import { BitcoinjsConfig, IBitcoinApiProvider, NetworkType, Utxo } from '../../types.js';
+import { BitcoinTransactionParams, BitcoinTransactionResult, IBitcoinApiProvider, NetworkType } from '../../types/common.js';
+import { UtxoSelector } from './utxo-selector.js';
+import { Target, UTXO } from 'coinselect';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);
@@ -61,122 +63,104 @@ export class BitcoinjsProvider {
         return address;
     }
 
-    async fetchUtxos(address: string): Promise<Utxo[]> {
+    async fetchUtxos(address: string): Promise<UTXO[]> {
         return await this.api.getAddressUtxos(address);
-    }
-
-    async createTransaction(params: {
-        keyPair: ECPairInterface;
-        toAddress: string;
-        amountSats: number;
-        feeSats: number;
-        utxos: Utxo[];
-    }): Promise<string> {
-        const { keyPair, toAddress, amountSats, feeSats, utxos } = params;
-        const psbt = new bitcoin.Psbt({ network: this.network });
-        const fromAddress = this.getAddressFromKeyPair(keyPair);
-
-        let totalInput = 0;
-
-        for (const utxo of utxos) {
-            psbt.addInput({
-                hash: utxo.txid,
-                index: utxo.vout,
-                witnessUtxo: {
-                    script: bitcoin.address.toOutputScript(fromAddress, this.network),
-                    value: utxo.value,
-                },
-            });
-            totalInput += utxo.value;
-            if (totalInput >= amountSats + feeSats) break;
-        }
-
-        if (totalInput < amountSats + feeSats) {
-            throw new Error('Insufficient selected UTXOs for this transaction');
-        }
-
-        psbt.addOutput({ address: toAddress, value: amountSats });
-
-        const change = totalInput - amountSats - feeSats;
-        if (change > 0) {
-            psbt.addOutput({ address: fromAddress, value: change });
-        }
-
-        psbt.signAllInputs({
-            publicKey: Buffer.from(keyPair.publicKey),
-            sign: (hash: Buffer) => Buffer.from(keyPair.sign(hash)),
-        });
-
-        psbt.finalizeAllInputs();
-
-        return psbt.extractTransaction().toHex();
-    }
-
-    async createTransactionDynamicFees(params: {
-        keyPair: ECPairInterface;
-        toAddress: string;
-        amountSats: number;
-        utxos: Utxo[];
-        feeRate?: number;
-    }): Promise<string> {
-        const { keyPair, toAddress, amountSats, utxos, feeRate = 1 } = params;
-        const psbt = new bitcoin.Psbt({ network: this.network });
-        const fromAddress = this.getAddressFromKeyPair(keyPair);
-
-        let totalInput = 0;
-        const selectedUtxos: Utxo[] = [];
-
-        for (const utxo of utxos) {
-            selectedUtxos.push(utxo);
-            totalInput += utxo.value;
-
-            // Estimate tx size:
-            const inputCount = selectedUtxos.length;
-            const outputCount = 2; // one to recipient, one change (worst case)
-            const estimatedSize = inputCount * 68 + outputCount * 31 + 10; // conservative estimate
-            const estimatedFee = Math.ceil(estimatedSize * feeRate);
-
-            if (totalInput >= amountSats + estimatedFee) break;
-        }
-
-        const inputCount = selectedUtxos.length;
-        const outputCount = 2; // assume change
-        const estimatedSize = inputCount * 68 + outputCount * 31 + 10;
-        const feeSats = Math.ceil(estimatedSize * feeRate);
-
-        if (totalInput < amountSats + feeSats) {
-            throw new Error('Insufficient UTXOs to cover amount + fee');
-        }
-
-        for (const utxo of selectedUtxos) {
-            psbt.addInput({
-                hash: utxo.txid,
-                index: utxo.vout,
-                witnessUtxo: {
-                    script: bitcoin.address.toOutputScript(fromAddress, this.network),
-                    value: utxo.value,
-                },
-            });
-        }
-
-        psbt.addOutput({ address: toAddress, value: amountSats });
-
-        const change = totalInput - amountSats - feeSats;
-        if (change > 0) {
-            psbt.addOutput({ address: fromAddress, value: change });
-        }
-
-        psbt.signAllInputs({
-            publicKey: Buffer.from(keyPair.publicKey),
-            sign: (hash: Buffer) => Buffer.from(keyPair.sign(hash)),
-        });
-
-        psbt.finalizeAllInputs();
-
-        return psbt.extractTransaction().toHex();
     }
 
     async broadcastTransaction(rawTxHex: string): Promise<string> {
         return await this.api.broadcastTransaction(rawTxHex);
     }
+
+
+    /**
+     * Creates and signs a Bitcoin transaction using PSBT.
+     *
+     * @param {BitcoinTransactionParams} params - The transaction parameters.
+     * @param {ECPairInterface} params.keyPair - The ECPair used to sign the transaction.
+     * @param {string} params.toAddress - The recipient's Bitcoin address (must be a SegWit or Taproot address).
+     * @param {number} params.amountSats - The amount to send in satoshis.
+     * @param {UTXO[]} [params.utxos] - Optional list of UTXOs to spend. If not provided, they will be fetched automatically.
+     * @param {number} [params.fixedFee] - Optional fixed transaction fee (in sats). Use this OR feeRate.
+     * @param {number} [params.feeRate] - Optional fee rate (sats/vB). Use this OR fixedFee.
+     * @param {UtxoSelectStrategy} [params.utxoSelectStrategy] - Optional UTXO selection strategy.
+     *
+     * @returns {Promise<BitcoinTransactionResult>} A promise that resolves to the finalized transaction data.
+     *
+     * @throws {Error} If legacy (non-SegWit) UTXOs or addresses are used. Only SegWit (P2WPKH) or Taproot (P2TR) are supported.
+     */
+    async createTransaction(params: BitcoinTransactionParams): Promise<BitcoinTransactionResult> {
+
+        const { keyPair, toAddress, amountSats, utxos, feeRate, fixedFee, utxoSelectStrategy } = params;
+        const psbt = new bitcoin.Psbt({ network: this.network });
+        const fromAddress = this.getAddressFromKeyPair(keyPair);
+
+        // Ensure UTXOs are available
+        const utxoList = utxos?.length ? utxos : await this.fetchUtxos(fromAddress);
+        if (!utxoList || utxoList.length === 0) {
+            throw new Error('No UTXOs available for transaction');
+        }
+
+        const targets: Target[] = [{
+            address: toAddress, value: amountSats
+        }];
+
+        // UTXO selection using strategy
+        const utxoSelector = new UtxoSelector(utxoSelectStrategy);
+        const { inputs, outputs, fee } = utxoSelector.select(utxoList, targets, feeRate, fixedFee);
+
+        if (!inputs || inputs.length === 0 || !outputs || outputs.length === 0) {
+            throw new Error('Failed to select UTXOs, user balance may be not sufficient');
+        }
+
+        // Add inputs to PSBT
+        for (const utxo of inputs) {
+            psbt.addInput({
+                hash: utxo.txId,
+                index: utxo.vout,
+                witnessUtxo: {
+                    script: bitcoin.address.toOutputScript(fromAddress, this.network),
+                    value: utxo.value,
+                },
+
+            });
+        }
+
+        var finalOutputs: Target[] = [];
+        outputs.forEach(output => {
+
+            if (!output.address) {
+                output.address = fromAddress
+            }
+
+            psbt.addOutput({
+                address: output.address,
+                value: output.value,
+            })
+
+            finalOutputs.push({
+                address: output.address,
+                value: output.value,
+            })
+        })
+
+        // Sign all inputs
+        psbt.signAllInputs({
+            publicKey: Buffer.from(keyPair.publicKey),
+            sign: (hash: Buffer) => Buffer.from(keyPair.sign(hash)),
+        });
+
+        // Finalize and return transaction hex
+        psbt.finalizeAllInputs();
+        const hex = psbt.extractTransaction().toHex();
+
+        return {
+            hex,
+            inputs,
+            outputs: finalOutputs,
+            fee,
+        };
+
+    }
+
+
 }

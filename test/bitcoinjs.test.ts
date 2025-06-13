@@ -1,13 +1,14 @@
 import { expect } from 'chai';
 import { BitcoinjsProvider } from '../src/providers/bitcoin/bitcoinjs.js';
-import { IBitcoinApiProvider, Utxo } from '../src/types.js';
+import { IBitcoinApiProvider } from '../src/types/common.js';
 import { appConfig } from '../src/config.js';
+import { UTXO } from 'coinselect';
 
 const mockApiProvider: IBitcoinApiProvider = {
-    async getAddressUtxos(address: string): Promise<Utxo[]> {
+    async getAddressUtxos(address: string): Promise<UTXO[]> {
         return [
             {
-                txid: 'a'.repeat(64),
+                txId: 'a'.repeat(64),
                 vout: 0,
                 value: 10_000,
             },
@@ -38,7 +39,7 @@ describe('BitcoinProvider ' + appConfig.network, () => {
         expect(address.startsWith(expectedPrefix)).to.be.true;
     });
 
-    it('creates and signs a transaction on regtest', async () => {
+    it('creates and signs a transaction', async () => {
         const mnemonic = provider.generateMnemonic();
         const keyPair = provider.getKeyPairFromMnemonic(mnemonic);
 
@@ -50,16 +51,18 @@ describe('BitcoinProvider ' + appConfig.network, () => {
             keyPair,
             toAddress,
             amountSats: 5000,
-            feeSats: 1000,
             utxos,
+            feeRate: 1
         });
 
-        expect(typeof rawTx).to.be.equal('string');
-        expect(rawTx.length).to.be.greaterThan(12)
+        expect(typeof rawTx.hex).to.be.equal('string');
+        expect(rawTx.hex.length).to.be.greaterThan(12)
     });
 
     it('broadcasts a transaction (mocked)', async () => {
         const txid = await provider.broadcastTransaction('deadbeef');
         expect(txid).to.be.equal('mock-txid');
     });
+
+    
 });

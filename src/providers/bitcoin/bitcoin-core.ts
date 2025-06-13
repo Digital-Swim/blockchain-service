@@ -1,5 +1,5 @@
 import Client from 'bitcoin-core'
-import { BitcoinCoreClientConfig } from '../../types.js';
+import { BitcoinCoreClientConfig } from '../../types/common.js';
 
 
 //bcrt1qxuur0q92f9khlqm0n3rzgk5jv58q0xjct0gavr

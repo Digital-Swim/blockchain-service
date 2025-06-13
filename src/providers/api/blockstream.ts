@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { appConfig } from '../../config.js';
-import { NetworkType } from '../../types.js';
+import { NetworkType } from '../../types/common.js';
 
 export class BlockstreamApiProvider {
     private baseUrl: string;
