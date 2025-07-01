@@ -26,6 +26,7 @@
     "@cmdcode/crypto-utils": "^2.0.2",
     "@cmdcode/tapscript": "^1.5.3",
     "axios": "^1.9.0",
+    "bip-schnorr": "^0.6.7",
     "bip32": "^5.0.0-rc.0",
     "bip39": "^3.1.0",
     "bitcoin-core": "^5.0.0",
