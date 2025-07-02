@@ -20,7 +20,7 @@ describe('BitcoinWallet across networks', () => {
             let wallet: BitcoinWallet;
 
             before(() => {
-                wallet = new BitcoinWallet(undefined, network);
+                wallet = new BitcoinWallet({});
             });
 
             it('should generate a valid WIF', () => {
@@ -31,7 +31,7 @@ describe('BitcoinWallet across networks', () => {
 
             it('should restore wallet from WIF and match address', () => {
                 const wif = wallet.getPrivateKeyWIF();
-                const restored = new BitcoinWallet(wif, network);
+                const restored = new BitcoinWallet({});
                 expect(restored.getAddress('p2wpkh')).to.equal(wallet.getAddress('p2wpkh'));
             });
 
@@ -56,7 +56,7 @@ describe('BitcoinWallet across networks', () => {
             });
 
             it('should fail verification with wrong address', () => {
-                const other = new BitcoinWallet(undefined, network);
+                const other = new BitcoinWallet({});
                 const msg = 'wrong verify';
                 const sig = wallet.signMessage(msg);
                 const isValid = BitcoinWallet.verifyMessage(msg, other.getAddress('p2pkh'), sig, network);

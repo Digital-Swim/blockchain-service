@@ -25,7 +25,7 @@ const provider = new BitcoinjsProvider(mockApiProvider, appConfig.network);
 describe('BitcoinProvider ' + appConfig.network, () => {
 
     it('creates and signs a transaction', async () => {
-        const wallet = new BitcoinWallet(appConfig.network);
+        const wallet = new BitcoinWallet({});
         const utxos = await provider.fetchUtxos(wallet.getAddress());
         const rawTx = await provider.createTransaction({
             wallet,

@@ -3,6 +3,7 @@ declare module 'coinselect' {
         txId: string;
         vout: number;
         value: number;
+        address?: string
     }
 
     export interface Target {

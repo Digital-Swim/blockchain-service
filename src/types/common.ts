@@ -8,6 +8,12 @@ export type UtxoSelectStrategy = 'default' | 'accumulative' | 'blackjack' | 'bre
 export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr';
 
 
+export interface RpcConfig {
+    url: string;
+    username: string;
+    password: string;
+}
+
 export type BitcoinCoreClientConfig = {
   headers?: Record<string, string>;
   host?: string;

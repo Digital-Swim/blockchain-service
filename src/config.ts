@@ -1,10 +1,10 @@
 import dotenv from 'dotenv'
-import { AppConfig } from './types/common.js'
+import { AppConfig, NetworkType } from './types/common.js'
 
 dotenv.config()
 
 export const appConfig: AppConfig = {
-    network: 'mainnet',
+    network: (process.env.BITCOIN_NETWORK as NetworkType) || 'regtest',
     bitcoinjs: {},
     blockstream: {
         mainnet: process.env.BLOCKSTREAM_MAINNET_URL || 'https://blockstream.info/api',

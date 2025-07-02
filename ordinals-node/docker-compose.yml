@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  ord:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ord
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./files:/files
+    ports:
+      - "8080:80"  # 👈 Maps host:8080 to container:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: >
+      ord --regtest
+      --bitcoin-rpc-username ranjit
+      --bitcoin-rpc-password ranjit
+      --bitcoin-rpc-url http://host.docker.internal:18443
+      server --address 0.0.0.0
