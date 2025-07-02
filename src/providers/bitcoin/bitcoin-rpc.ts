@@ -1,5 +1,5 @@
 import { UTXO } from "coinselect";
-import { Rpc } from "../utility/rpc.js";
+import { Rpc } from "../utils/rpc.js";
 
 export class BitcoinRpcProvider extends Rpc {
 

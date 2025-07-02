@@ -2,7 +2,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
 import { ECPairFactory } from 'ecpair';
-import { BitcoinjsProvider } from '../bitcoin/bitcoinjs.js';
+import { BitcoinTransaction } from '../bitcoin/utils/bitcoin-transaction.js';
 import { IBitcoinApiProvider, NetworkType } from '../../types/common';
 import { BitcoinWallet } from '../../core/wallets/bitcoin.js';
 import { Psbt } from 'bitcoinjs-lib';
@@ -24,11 +24,12 @@ const ECPair: ECPairAPI = ECPairFactory(ecc);
 
 bitcoin.initEccLib(ecc);
 
-export class OrdinalProvider extends BitcoinjsProvider {
+export class OrdinalProvider {
 
+    protected network: bitcoin.networks.Network;
 
     constructor(apiProvider: IBitcoinApiProvider, network: NetworkType) {
-        super(apiProvider, network);
+        this.network = BitcoinTransaction.getNetwork(network)
     }
 
     async createInscriptionTransactions(options: any) {

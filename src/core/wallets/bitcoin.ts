@@ -53,6 +53,7 @@ export class BitcoinWallet {
     getPublicKey(): Uint8Array {
         return this.keyPair.publicKey;
     }
+    
     sign(hash: Uint8Array): Uint8Array {
         return this.keyPair.sign(hash);
     }
