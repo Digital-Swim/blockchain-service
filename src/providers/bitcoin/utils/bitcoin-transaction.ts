@@ -19,19 +19,20 @@ export class BitcoinTransaction {
         return network === 'mainnet' ? bitcoin.networks.bitcoin : network === 'testnet' ? bitcoin.networks.testnet : network === 'regtest' ? bitcoin.networks.regtest : (() => { throw new Error(`Unsupported network: ${appConfig.network}`); })();
     }
 
+
     static async create(params: BitcoinTransactionParams, network: NetworkType): Promise<BitcoinTransactionResult> {
 
-        const { wallet, toAddress, amountSats, utxos, feeRate, fixedFee, utxoSelectStrategy } = params;
+        const { from, toAddress, amountSats, utxos, feeRate, fixedFee, utxoSelectStrategy } = params;
         const btcNetwork = BitcoinTransaction.getNetwork(network)
         const psbt = new bitcoin.Psbt({ network: btcNetwork });
-        const fromAddress = wallet.getAddress();
+        const fromAddress = from.getAddress('p2wpkh');
 
-        if (utxos?.length) throw new Error('No UTXOs available');
+        if (!utxos?.length) throw new Error('No UTXOs available');
 
         const utxoSelector = new UtxoSelector(utxoSelectStrategy);
         const { inputs, outputs, fee } = utxoSelector.select(utxos!, [{ address: toAddress, value: amountSats }], feeRate, fixedFee);
 
-        if (!inputs.length || !outputs.length) throw new Error('UTXO selection failed, please check if there are sufficient funds');
+        if (!inputs?.length || !outputs?.length) throw new Error('UTXO selection failed, please check if there are sufficient funds');
 
         for (const input of inputs) {
             psbt.addInput({
@@ -62,9 +63,7 @@ export class BitcoinTransaction {
             })
         });
 
-
-        psbt.signAllInputs({ publicKey: wallet.getPublicKey(), sign: (hash) => Buffer.from(wallet.sign(hash)) });
-
+        psbt.signAllInputs(from.getSignableKey());
         psbt.finalizeAllInputs();
 
         return {
@@ -73,6 +72,7 @@ export class BitcoinTransaction {
             outputs,
             fee,
         };
+
     }
 
 }

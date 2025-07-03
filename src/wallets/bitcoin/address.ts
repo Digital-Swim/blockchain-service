@@ -43,6 +43,27 @@ export class BitcoinAddress {
         }
     }
 
+    getOutputScript(type: BitcoinAddressType = 'p2pkh', scriptTree?: Taptree, redeem?: any): Buffer {
+        const address = this.getAddress(type, scriptTree, redeem);
+        return bitcoin.address.toOutputScript(address, this.network);
+    }
+
+    getDescriptor(type: BitcoinAddressType = 'p2pkh'): string {
+        const wif = this.getPrivateKeyWIF();
+        switch (type) {
+            case 'p2pkh':
+                return `pkh(${wif})`;
+            case 'p2sh':
+                return `sh(pkh(${wif}))`;
+            case 'p2wpkh':
+                return `wpkh(${wif})`;
+            case 'p2tr':
+                return `tr(${this.getXOnlyPublicKey().toString('hex')})`;
+            default:
+                throw new Error(`Unsupported address type: ${type}`);
+        }
+    }
+
     getKeypair(): ECPairInterface {
         return this.keyPair;
     }
@@ -114,17 +135,21 @@ export class BitcoinAddress {
         return signature.toString('base64');
     }
 
-    /**
-     * Returns the appropriate key for PSBT signing depending on address type
-     */
-    getSignableKey(): bitcoin.Signer {
-        return {
-            publicKey: this.getXOnlyPublicKey(),
-            sign: (hash: Buffer) => Buffer.from(this.keyPair.sign(hash)),
-            signSchnorr: this.keyPair.signSchnorr
-                ? (hash: Buffer) => Buffer.from(this.keyPair.signSchnorr!(hash))
-                : undefined,
+    getSignableKey(type: BitcoinAddressType = 'p2pkh'): bitcoin.Signer {
+
+        if (type === 'p2tr') {
+            return {
+                publicKey: this.getXOnlyPublicKey(),
+                sign: (hash: Buffer) => Buffer.from(this.keyPair.sign(hash)),
+                signSchnorr: this.keyPair.signSchnorr
+                    ? (hash: Buffer) => Buffer.from(this.keyPair.signSchnorr!(hash))
+                    : undefined,
+            };
         }
+        return {
+            publicKey: this.getPublicKey(),
+            sign: (hash: Buffer) => Buffer.from(this.keyPair.sign(hash)),
+        };
     }
 
     static verifyMessage(

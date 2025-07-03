@@ -13,6 +13,7 @@ export class BitcoinWallet {
     private root: bip32.BIP32Interface;
     private network: bitcoin.networks.Network;
     private mnemonic: string;
+    private cointtype;
 
     constructor(mnemonic?: string, network: NetworkType = 'mainnet') {
 
@@ -30,6 +31,7 @@ export class BitcoinWallet {
 
         this.seed = bip39.mnemonicToSeedSync(mnemonic);
         this.root = BIP32.fromSeed(this.seed, this.network);
+        this.cointtype = this.network === bitcoin.networks.bitcoin ? 0 : 1;
     }
 
     getMnemonic(): string {
@@ -44,9 +46,16 @@ export class BitcoinWallet {
         return this.root.neutered().toBase58();
     }
 
+    //Native SegWit single-sig
+
+    getDescriptor(accountIndex = 0): string {
+        const derivationPath = `84'/${this.cointtype}'/${accountIndex}'`;
+        const fingerprint = Buffer.from(this.root.fingerprint).toString('hex').toUpperCase();
+        const xprv = this.root.derivePath(derivationPath).toBase58();
+        return `wpkh([${fingerprint}/${derivationPath}]${xprv}/0/*)`;
+    }
     getAddress(index: number, change: number = 0, accountIndex: number = 0): BitcoinAddress {
-        const coinType = this.network === bitcoin.networks.bitcoin ? 0 : 1;
-        const path = `m/84'/${coinType}'/${accountIndex}'/${change}/${index}`;
+        const path = `m/84'/${this.cointtype}'/${accountIndex}'/${change}/${index}`;
         const child = this.root.derivePath(path);
         return new BitcoinAddress({ wif: child.toWIF(), network: this.network });
     }

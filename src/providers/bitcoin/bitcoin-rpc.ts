@@ -1,5 +1,6 @@
 import { UTXO } from "coinselect";
 import { Rpc } from "../utils/rpc.js";
+import { BitcoinCoreAddressType } from "../../types/common.js";
 
 export class BitcoinRpcProvider extends Rpc {
 
@@ -7,7 +8,7 @@ export class BitcoinRpcProvider extends Rpc {
         return {
             txId: raw.txId ?? raw.txid,           // accept either `txId` or `txid`
             vout: raw.vout,
-            value: raw.value ?? raw.amount,       // accept either `value` or `amount`
+            value: Math.round((raw.value ?? raw.amount) * 1e8), // accept either `value` or `amount`
             address: raw.address
         };
     }
@@ -16,11 +17,23 @@ export class BitcoinRpcProvider extends Rpc {
         return this.call<any>('getblockchaininfo');
     }
 
-    getDescriptorInfo(walletName: string, wif: string) {
-        return this.call('getdescriptorinfo', [`wpkh(${wif})`], `/wallet/${walletName}`);
+    getDescriptorInfo(discriptor: string) {
+        return this.call('getdescriptorinfo', [discriptor]);
     }
 
-    getNewAddress(walletName: string, label = '', addressType = 'bech32') {
+    importAddressToWallet(walletName: string, discriptor: string, label?: string) {
+        const params = [
+            {
+                "desc": discriptor,
+                "timestamp": "now",
+                "label": label,
+                "keypool": true
+            }
+        ]
+        return this.call('importdescriptors', [params], `/wallet/${walletName}`);
+    }
+
+    getNewAddress(walletName: string, label = '', addressType:BitcoinCoreAddressType = 'bech32') {
         return this.call('getnewaddress', [label, addressType], `/wallet/${walletName}`);
     }
 
@@ -48,6 +61,7 @@ export class BitcoinRpcProvider extends Rpc {
         const path = wallet ? `/wallet/${wallet}` : '';
         return this.call('sendtoaddress', [address, amount], path);
     }
+
 
     listUnspent(walletName: string): Promise<UTXO[]> {
         return new Promise((resolve, reject) => {

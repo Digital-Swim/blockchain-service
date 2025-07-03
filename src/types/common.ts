@@ -6,12 +6,13 @@ import { BitcoinAddress } from "../wallets/bitcoin/address";
 export type NetworkType = 'mainnet' | 'testnet' | 'regtest';
 export type UtxoSelectStrategy = 'default' | 'accumulative' | 'blackjack' | 'break' | 'split';
 export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr';
+export type BitcoinCoreAddressType = 'legacy' | 'p2sh-segwit' | 'bech32' | 'bech32m';
 
 
 export interface RpcConfig {
-    url: string;
-    username: string;
-    password: string;
+  url: string;
+  username: string;
+  password: string;
 }
 
 export type BitcoinCoreClientConfig = {
@@ -50,10 +51,10 @@ export type BitcoinFeeRate = {
 }
 
 export type BitcoinTransactionParams = {
-  wallet: BitcoinAddress;
+  from: BitcoinAddress;
   toAddress: string;
   amountSats: number;
-  utxos?: UTXO[];
+  utxos: UTXO[];
   fixedFee?: number;
   feeRate?: number;
   utxoSelectStrategy?: UtxoSelectStrategy;
