@@ -63,7 +63,7 @@ export class BitcoinTransaction {
         });
 
 
-        psbt.signAllInputs({ publicKey: Buffer.from(wallet.getPublicKey()), sign: (hash) => Buffer.from(wallet.sign(hash)) });
+        psbt.signAllInputs({ publicKey: wallet.getPublicKey(), sign: (hash) => Buffer.from(wallet.sign(hash)) });
 
         psbt.finalizeAllInputs();
 

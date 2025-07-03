@@ -1,9 +1,10 @@
 import { expect } from 'chai';
 import * as bitcoin from 'bitcoinjs-lib';
-import { BitcoinWallet } from '../src/core/wallets/bitcoin.js';
+import { BitcoinWallet } from '../src/wallets/bitcoin/wallet.js';
 import { NetworkType } from '../src/types/common.js';
+import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
 
-const supportedNetworks: NetworkType[] = ['mainnet', 'testnet', 'regtest']
+const supportedNetworks: NetworkType[] = ['mainnet', 'testnet', 'regtest'];
 
 const networks = {
     mainnet: bitcoin.networks.bitcoin,
@@ -18,28 +19,30 @@ describe('BitcoinWallet across networks', () => {
 
         describe(`Network: ${networkName}`, () => {
             let wallet: BitcoinWallet;
+            let address: BitcoinAddress;
 
             before(() => {
-                wallet = new BitcoinWallet({});
+                wallet = new BitcoinWallet(undefined, networkName); // auto-generates mnemonic
+                address = wallet.getAddress(0); // index 0, change 0
             });
 
             it('should generate a valid WIF', () => {
-                const wif = wallet.getPrivateKeyWIF();
+                const wif = address.getPrivateKeyWIF();
                 expect(wif).to.be.a('string');
                 expect(wif.length).to.be.greaterThan(10);
             });
 
             it('should restore wallet from WIF and match address', () => {
-                const wif = wallet.getPrivateKeyWIF();
-                const restored = new BitcoinWallet({});
-                expect(restored.getAddress('p2wpkh')).to.equal(wallet.getAddress('p2wpkh'));
+                const wif = address.getPrivateKeyWIF();
+                const restored = new BitcoinAddress({ wif, network });
+                expect(restored.getAddress('p2wpkh')).to.equal(address.getAddress('p2wpkh'));
             });
 
             it('should generate valid addresses for all supported types', () => {
-                const p2pkh = wallet.getAddress('p2pkh');
-                const p2wpkh = wallet.getAddress('p2wpkh');
-                const p2sh = wallet.getAddress('p2sh');
-                const p2tr = wallet.getAddress('p2tr');
+                const p2pkh = address.getAddress('p2pkh');
+                const p2wpkh = address.getAddress('p2wpkh');
+                const p2sh = address.getAddress('p2sh');
+                const p2tr = address.getAddress('p2tr');
 
                 expect(p2pkh).to.be.a('string');
                 expect(p2wpkh).to.match(/^(bc1|tb1|bcrt1)/);
@@ -48,23 +51,23 @@ describe('BitcoinWallet across networks', () => {
             });
 
             it('should sign and verify message successfully', () => {
-                const address = wallet.getAddress('p2pkh');
+                const addr = address.getAddress('p2pkh');
                 const msg = `test message on ${networkName}`;
-                const sig = wallet.signMessage(msg);
-                const isValid = BitcoinWallet.verifyMessage(msg, address, sig, network);
+                const sig = address.signMessage(msg);
+                const isValid = BitcoinAddress.verifyMessage(msg, addr, sig, network);
                 expect(isValid).to.be.true;
             });
 
             it('should fail verification with wrong address', () => {
-                const other = new BitcoinWallet({});
+                const other = new BitcoinAddress({ network });
                 const msg = 'wrong verify';
-                const sig = wallet.signMessage(msg);
-                const isValid = BitcoinWallet.verifyMessage(msg, other.getAddress('p2pkh'), sig, network);
+                const sig = address.signMessage(msg);
+                const isValid = BitcoinAddress.verifyMessage(msg, other.getAddress('p2pkh'), sig, network);
                 expect(isValid).to.be.false;
             });
 
             it('should throw on unsupported address type', () => {
-                expect(() => wallet.getAddress('foo' as any)).to.throw('Unsupported address type');
+                expect(() => address.getAddress('foo' as any)).to.throw('Unsupported address type');
             });
         });
     }

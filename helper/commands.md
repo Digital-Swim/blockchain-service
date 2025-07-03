@@ -25,6 +25,11 @@ bitcoin-cli -regtest sendrawtransaction <signed_hex>
 -rpcwallet=ranjit 
 
 
+## import new address into bitcoin wallet 
+
+
+
 # Ordinals 
 ord --regtest --bitcoin-rpc-username ranjit --bitcoin-rpc-password ranjit server
+
 

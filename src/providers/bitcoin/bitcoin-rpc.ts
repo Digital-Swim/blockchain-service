@@ -16,6 +16,10 @@ export class BitcoinRpcProvider extends Rpc {
         return this.call<any>('getblockchaininfo');
     }
 
+    getDescriptorInfo(walletName: string, wif: string) {
+        return this.call('getdescriptorinfo', [`wpkh(${wif})`], `/wallet/${walletName}`);
+    }
+
     getNewAddress(walletName: string, label = '', addressType = 'bech32') {
         return this.call('getnewaddress', [label, addressType], `/wallet/${walletName}`);
     }

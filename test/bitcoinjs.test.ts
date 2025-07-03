@@ -3,7 +3,7 @@ import { BitcoinTransaction } from '../src/providers/bitcoin/utils/bitcoin-trans
 import { IBitcoinApiProvider } from '../src/types/common.js';
 import { appConfig } from '../src/config.js';
 import { UTXO } from 'coinselect';
-import { BitcoinWallet } from '../src/core/wallets/bitcoin.js';
+import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
 
 const mockApiProvider: IBitcoinApiProvider = {
     async getAddressUtxos(address: string): Promise<UTXO[]> {
