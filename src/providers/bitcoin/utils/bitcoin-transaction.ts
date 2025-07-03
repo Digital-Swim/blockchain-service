@@ -20,10 +20,11 @@ export class BitcoinTransaction {
     }
 
 
-    static async create(params: BitcoinTransactionParams, network: NetworkType): Promise<BitcoinTransactionResult> {
+    static async create(params: BitcoinTransactionParams, network: NetworkType | bitcoin.Network): Promise<BitcoinTransactionResult> {
 
         const { from, toAddress, amountSats, utxos, feeRate, fixedFee, utxoSelectStrategy } = params;
-        const btcNetwork = BitcoinTransaction.getNetwork(network)
+        const btcNetwork = (typeof network === "string") ? BitcoinTransaction.getNetwork(network) : network;
+
         const psbt = new bitcoin.Psbt({ network: btcNetwork });
         const fromAddress = from.getAddress('p2wpkh');
 
@@ -69,7 +70,7 @@ export class BitcoinTransaction {
         return {
             hex: psbt.extractTransaction().toHex(),
             inputs,
-            outputs,
+            outputs: finalOutputs,
             fee,
         };
 
