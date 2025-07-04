@@ -13,6 +13,10 @@ export class BitcoinRpcProvider extends Rpc {
         };
     }
 
+    async getBlockByHash(blockHash: string): Promise<any> {
+        return this.call('getblock', [blockHash]);
+    }
+
     getBlockchainInfo() {
         return this.call<any>('getblockchaininfo');
     }
@@ -33,7 +37,7 @@ export class BitcoinRpcProvider extends Rpc {
         return this.call('importdescriptors', [params], `/wallet/${walletName}`);
     }
 
-    getNewAddress(walletName: string, label = '', addressType:BitcoinCoreAddressType = 'bech32') {
+    getNewAddress(walletName: string, label = '', addressType: BitcoinCoreAddressType = 'bech32') {
         return this.call('getnewaddress', [label, addressType], `/wallet/${walletName}`);
     }
 
@@ -61,7 +65,6 @@ export class BitcoinRpcProvider extends Rpc {
         const path = wallet ? `/wallet/${wallet}` : '';
         return this.call('sendtoaddress', [address, amount], path);
     }
-
 
     listUnspent(walletName: string): Promise<UTXO[]> {
         return new Promise((resolve, reject) => {
@@ -101,4 +104,5 @@ export class BitcoinRpcProvider extends Rpc {
     signRawTransactionWithWallet(rawTxHex: string, walletName?: string) {
         return this.call('signrawtransactionwithwallet', [rawTxHex], `/wallet/${walletName}`);
     }
+
 }

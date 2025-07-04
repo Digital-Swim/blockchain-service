@@ -33,3 +33,5 @@ bitcoin-cli -regtest sendrawtransaction <signed_hex>
 ord --regtest --bitcoin-rpc-username ranjit --bitcoin-rpc-password ranjit server
 
 
+ord --regtest --bitcoin-rpc-username ranjit --bitcoin-rpc-password ranjit  --bitcoin-rpc-url http://host.docker.internal:18443 index update 
+

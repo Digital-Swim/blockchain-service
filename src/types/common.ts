@@ -38,6 +38,7 @@ export type ApiUrls = {
 }
 
 export type BlockstreamConfig = NetworkUrls & {}
+export type BlockCypherConfig = NetworkUrls & {}
 export type MempoolConfig = NetworkUrls & {}
 export type BitcoinjsConfig = {}
 export type CoingeckoConfig = ApiUrls & {}
@@ -79,4 +80,26 @@ export interface AppConfig {
   bitcoinCore: BitcoinCoreClientConfig;
   mempool: MempoolConfig;
   coingecko: CoingeckoConfig;
+  blockcypher: BlockCypherConfig;
+}
+
+export interface BitcoinApiProvider {
+  getBlockchainInfo(): Promise<any>;
+
+  getBlockAtHeight(height: number): Promise<any>;
+  getBlockByHash(hash: string): Promise<any>;
+  getBlockTxs(hash: string, txStart?: number): Promise<any>;
+
+  getLatestBlockHash(): Promise<string>;
+
+  getTransaction(txid: string): Promise<any>;
+  getTransactionHex(txid: string): Promise<string>;
+  broadcastTransaction(rawTxHex: string): Promise<any>;
+
+  getAddressInfo(address: string): Promise<any>;
+  getAddressFull?(address: string, limit?: number, before?: string): Promise<any>;
+  getAddressUtxos(address: string): Promise<any[]>;
+
+  getMempoolInfo?(): Promise<any>;
+  getFeeEstimates?(): Promise<any>;
 }

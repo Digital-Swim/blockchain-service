@@ -6,6 +6,10 @@ dotenv.config()
 export const appConfig: AppConfig = {
     network: (process.env.BITCOIN_NETWORK as NetworkType) || 'regtest',
     bitcoinjs: {},
+    blockcypher: {
+        mainnet: process.env.BLOCKCYPHER_MAINNET_URL || 'https://api.blockcypher.com/v1/btc/main',
+        testnet: process.env.BLOCKCYPHER_TESTNET_URL || 'https://api.blockcypher.com/v1/btc/test3',
+    },
     blockstream: {
         mainnet: process.env.BLOCKSTREAM_MAINNET_URL || 'https://blockstream.info/api',
         testnet: process.env.BLOCKSTREAM_TESTNET_URL || 'https://blockstream.info/testnet/api',
