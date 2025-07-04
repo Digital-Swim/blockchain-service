@@ -6,6 +6,13 @@ dotenv.config()
 export const appConfig: AppConfig = {
     network: (process.env.BITCOIN_NETWORK as NetworkType) || 'regtest',
     bitcoinjs: {},
+    bitcoinNodes: [
+        {
+            username: process.env.BITCOIN_USERNAME ?? 'ranjit',
+            password: process.env.BITCOIN_PASSWORD ?? 'ranjit',
+            url: process.env.BITCOIN_HOST ?? 'http://localhost:18443',
+        }
+    ],
     blockcypher: {
         mainnet: process.env.BLOCKCYPHER_MAINNET_URL || 'https://api.blockcypher.com/v1/btc/main',
         testnet: process.env.BLOCKCYPHER_TESTNET_URL || 'https://api.blockcypher.com/v1/btc/test3',

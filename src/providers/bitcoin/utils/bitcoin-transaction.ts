@@ -23,8 +23,11 @@ export class BitcoinTransaction {
 
     static async create(params: BitcoinTransactionParams, network: NetworkType | bitcoin.Network): Promise<BitcoinTransactionResult> {
 
+
         const { from, toAddress, amountSats, utxos, feeRate, fixedFee, utxoSelectStrategy } = params;
         const btcNetwork = (typeof network === "string") ? BitcoinTransaction.getNetwork(network) : network;
+
+        if (typeof from === "string") throw new Error("Invalid from param, must be an object of BitcoinAddress class");
 
         const psbt = new bitcoin.Psbt({ network: btcNetwork });
         const fromAddress = from.getAddress('p2wpkh');

@@ -21,6 +21,7 @@ export interface RpcConfig {
   url: string;
   username: string;
   password: string;
+  walletName?: string
 }
 
 export type BitcoinCoreClientConfig = {
@@ -43,6 +44,7 @@ export interface AppConfig {
   mempool: MempoolConfig;
   coingecko: CoingeckoConfig;
   blockcypher: BlockCypherConfig;
+  bitcoinNodes: RpcConfig[]
 }
 
 

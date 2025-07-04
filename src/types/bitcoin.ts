@@ -26,6 +26,22 @@ export interface BitcoinApiProvider {
     getFeeEstimates?(): Promise<BitcoinFeeEstimates>;
 }
 
+export type BitcoinKey = {
+    type: BitcoinAddressType,
+    wif?: string,
+    privateKey?: string
+}
+
+export type BitcoinParams = {
+    from: string,
+    key: BitcoinKey,
+    to: string;
+    amountSats: number;
+    fixedFee?: number;
+    feeRate?: number;
+    utxoSelectStrategy?: UtxoSelectStrategy;
+};
+
 export interface BitcoinBlock {
     hash: string;
     height: number;
@@ -105,7 +121,7 @@ export type BitcoinFeeRate = {
 }
 
 export type BitcoinTransactionParams = {
-    from: BitcoinAddress;
+    from: BitcoinAddress | string;
     toAddress: string;
     amountSats: number;
     utxos: UTXO[];
