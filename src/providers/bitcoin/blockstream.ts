@@ -47,10 +47,10 @@ export class BlockstreamApiProvider implements BitcoinApiProvider {
                 scriptPubKey: '',
                 status: {
                     confirmed: utxo.status.confirmed,
-                    block_height: utxo.status.block_height,
-                    block_hash: utxo.status.block_hash,
-                    block_time: utxo.status.block_time
-                }
+                    blockHeight: utxo.status.block_height,
+                    blockHash: utxo.status.block_hash,
+                    blockTime: utxo.status.block_time
+                } as BitcoinTxStatus
             }));
     }
 
@@ -71,7 +71,7 @@ export class BlockstreamApiProvider implements BitcoinApiProvider {
             txCount: block.tx_count,
             prevHash: block.previousblockhash,
         }));
-      }
+    }
 
     async getBlockByHash(blockHash: string): Promise<BitcoinBlock> {
         const res = await axios.get(`${this.baseUrl}/block/${blockHash}`);
@@ -161,7 +161,7 @@ export class BlockstreamApiProvider implements BitcoinApiProvider {
         return info.balance;
     }
 
-    
+
     async getAddressFull(address: string, limit = 50): Promise<BitcoinTransaction[]> {
         const res = await axios.get(`${this.baseUrl}/address/${address}/txs?limit=${limit}`);
         return res.data.map((tx: any) => ({

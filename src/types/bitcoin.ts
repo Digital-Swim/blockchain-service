@@ -44,6 +44,7 @@ export interface BitcoinUtxo {
     value: number;
     confirmations: number;
     scriptPubKey: string;
+    status?:BitcoinTxStatus
 }
 
 export interface BitcoinFeeEstimates {
