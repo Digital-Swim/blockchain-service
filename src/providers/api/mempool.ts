@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { appConfig } from '../../config.js';
-import { BitcoinFeeRate, NetworkType } from '../../types/common.js';
+import {  NetworkType } from '../../types/common.js';
+import { BitcoinFeeRate } from '../../types/bitcoin.js';
 
 export class MempoolProvider {
     private baseUrl: string;

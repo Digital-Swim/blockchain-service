@@ -3,7 +3,7 @@ import * as bitcoinMessage from 'bitcoinjs-message';
 import * as bip32 from 'bip32';
 import { ECPairAPI, ECPairFactory, ECPairInterface } from "ecpair";
 import * as ecc from 'tiny-secp256k1';
-import { BitcoinAddressType, NetworkType } from '../../types/common.js';
+import { NetworkType } from '../../types/common.js';
 
 import {
     toXOnly,
@@ -11,6 +11,7 @@ import {
 
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
 import { BitcoinTransaction } from '../../providers/bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinAddressType } from '../../types/bitcoin.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);

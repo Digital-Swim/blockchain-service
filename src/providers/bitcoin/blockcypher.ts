@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BitcoinApiProvider, NetworkType } from '../../types/common.js';
+import { NetworkType } from '../../types/common.js';
 import {
     BitcoinBlock,
     BitcoinTransaction,
@@ -10,6 +10,7 @@ import {
     BitcoinTxStatus,
     BitcoinTxInput,
     BitcoinTxOutput,
+    BitcoinApiProvider,
 } from '../../types/bitcoin.js';
 import { appConfig } from '../../config.js';
 

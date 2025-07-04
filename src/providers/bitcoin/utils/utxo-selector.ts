@@ -5,7 +5,7 @@ import split from 'coinselect/split.js';
 import coinSelect from 'coinselect';
 
 import type { UTXO, Target, CoinSelectResult } from 'coinselect';
-import { UtxoSelectStrategy } from '../../../types/common';
+import { UtxoSelectStrategy } from '../../../types/bitcoin.js';
 
 export class UtxoSelector {
     strategy: UtxoSelectStrategy;

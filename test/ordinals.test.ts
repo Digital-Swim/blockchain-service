@@ -1,9 +1,7 @@
-import { expect } from 'chai';
-import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
-import { BitcoinTransactionParams, NetworkType } from '../src/types/common.js';
 import { BitcoinRpcProvider } from '../src/providers/bitcoin/bitcoin-rpc.js';
-import { BitcoinTransaction } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
 import { OrdinalProvider } from '../src/providers/ordinals/ordnials.js';
+import { NetworkType } from '../src/types/common.js';
+import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
 
 const network: NetworkType = "regtest";
 const rpc = new BitcoinRpcProvider({

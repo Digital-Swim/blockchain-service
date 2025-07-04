@@ -4,8 +4,9 @@ import { Target } from 'coinselect';
 import { ECPairAPI, ECPairFactory } from "ecpair";
 import * as ecc from 'tiny-secp256k1';
 import { appConfig } from '../../../config.js';
-import { BitcoinTransactionParams, BitcoinTransactionResult, NetworkType } from '../../../types/common.js';
+import { NetworkType } from '../../../types/common.js';
 import { UtxoSelector } from './utxo-selector.js';
+import { BitcoinTransactionParams, BitcoinTransactionResult } from '../../../types/bitcoin.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);

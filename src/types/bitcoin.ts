@@ -1,3 +1,31 @@
+import { Target, UTXO } from "coinselect";
+import { BitcoinAddress } from "../wallets/bitcoin/address";
+
+export type UtxoSelectStrategy = 'default' | 'accumulative' | 'blackjack' | 'break' | 'split';
+export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr';
+export type BitcoinCoreAddressType = 'legacy' | 'p2sh-segwit' | 'bech32' | 'bech32m';
+
+export interface BitcoinApiProvider {
+    getBlockchainInfo(): Promise<any>; // Optional: Define a type later
+
+    getBlockAtHeight(height: number): Promise<BitcoinBlock[]>;
+    getBlockByHash(hash: string): Promise<BitcoinBlock>;
+    getBlockTxs(hash: string, txStart?: number): Promise<string[]>;
+
+    getLatestBlockHash(): Promise<string>;
+
+    getTransaction(txid: string): Promise<BitcoinTransaction>;
+    getTransactionHex(txid: string): Promise<string>;
+    broadcastTransaction(rawTxHex: string): Promise<string>;
+
+    getAddressInfo(address: string): Promise<BitcoinAddressInfo>;
+    getAddressFull?(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]>;
+    getAddressUtxos(address: string): Promise<BitcoinUtxo[]>;
+
+    getMempoolInfo?(): Promise<BitcoinMempoolInfo>;
+    getFeeEstimates?(): Promise<BitcoinFeeEstimates>;
+}
+
 export interface BitcoinBlock {
     hash: string;
     height: number;
@@ -44,7 +72,7 @@ export interface BitcoinUtxo {
     value: number;
     confirmations: number;
     scriptPubKey: string;
-    status?:BitcoinTxStatus
+    status?: BitcoinTxStatus
 }
 
 export interface BitcoinFeeEstimates {
@@ -66,3 +94,29 @@ export interface BitcoinMempoolInfo {
     vsize: number;
     totalFee: number;
 }
+
+
+export type BitcoinFeeRate = {
+    fastestFee: number;
+    halfHourFee: number;
+    hourFee: number;
+    economyFee?: number;
+    minimumFee?: number;
+}
+
+export type BitcoinTransactionParams = {
+    from: BitcoinAddress;
+    toAddress: string;
+    amountSats: number;
+    utxos: UTXO[];
+    fixedFee?: number;
+    feeRate?: number;
+    utxoSelectStrategy?: UtxoSelectStrategy;
+};
+
+export type BitcoinTransactionResult = {
+    hex: string;
+    inputs: UTXO[];
+    outputs: Target[];
+    fee: number;
+};

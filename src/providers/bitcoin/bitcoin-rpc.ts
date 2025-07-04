@@ -1,6 +1,6 @@
 import { UTXO } from "coinselect";
 import { Rpc } from "../utils/rpc.js";
-import { BitcoinCoreAddressType } from "../../types/common.js";
+import { BitcoinCoreAddressType } from "../../types/bitcoin.js";
 
 export class BitcoinRpcProvider extends Rpc {
 

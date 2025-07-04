@@ -9,10 +9,11 @@ import {
     BitcoinMempoolInfo,
     BitcoinTxStatus,
     BitcoinTxOutput,
-    BitcoinTxInput
+    BitcoinTxInput,
+    BitcoinApiProvider
 } from '../../types/bitcoin.js';
 
-import { BitcoinApiProvider, NetworkType } from '../../types/common.js';
+import {  NetworkType } from '../../types/common.js';
 
 export class BlockstreamApiProvider implements BitcoinApiProvider {
     private baseUrl: string;
