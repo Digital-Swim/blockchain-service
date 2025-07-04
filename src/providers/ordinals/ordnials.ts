@@ -6,26 +6,10 @@ import {
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
 import { UTXO } from 'coinselect';
 import { NetworkType } from '../../types/common.js';
-import { BitcoinAddress } from '../../wallets/bitcoin/address.js';
+import { CommitTrasanctionParams, Inscription, RevelaTransactionParams } from '../../types/ordinals.js';
 import { BitcoinRpcProvider } from '../bitcoin/bitcoin-rpc.js';
 import { BitcoinTransaction } from '../bitcoin/utils/bitcoin-transaction.js';
 
-type Inscription = {
-    contentType: string,
-    data: Buffer | string
-}
-
-type CommitTrasanctionParams = {
-    from: BitcoinAddress
-    inscription: Inscription
-}
-
-type RevelaTransactionParams = {
-    from: BitcoinAddress,
-    to: string,
-    inscription: Inscription,
-    commitUTXO: UTXO,
-}
 
 
 export class OrdinalProvider {
