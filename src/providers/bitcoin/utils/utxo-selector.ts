@@ -4,8 +4,8 @@ import broken from 'coinselect/break.js';
 import split from 'coinselect/split.js';
 import coinSelect from 'coinselect';
 
-import type { UTXO, Target, CoinSelectResult } from 'coinselect';
-import { UtxoSelectStrategy } from '../../../types/bitcoin.js';
+import type { Target, CoinSelectResult } from 'coinselect';
+import { BitcoinUtxo, UtxoSelectStrategy } from '../../../types/bitcoin.js';
 
 export class UtxoSelector {
     strategy: UtxoSelectStrategy;
@@ -28,7 +28,7 @@ export class UtxoSelector {
      * @param feeRate - Fee rate in satoshis per byte.
      * @returns Selected inputs, outputs, and estimated fee.
      */
-    selectDefault(utxos: UTXO[], targets: Target[], feeRate: number): CoinSelectResult {
+    selectDefault(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
         return coinSelect(utxos, targets, feeRate);
     }
 
@@ -42,7 +42,7 @@ export class UtxoSelector {
      * @param feeRate - Fee rate in satoshis per byte.
      * @returns Selected inputs, outputs, and estimated fee.
      */
-    selectAccumulative(utxos: UTXO[], targets: Target[], feeRate: number): CoinSelectResult {
+    selectAccumulative(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
         return accumulative(utxos, targets, feeRate);
     }
 
@@ -56,7 +56,7 @@ export class UtxoSelector {
      * @param feeRate - Fee rate in satoshis per byte.
      * @returns Selected inputs, outputs, and estimated fee.
      */
-    selectBlackjack(utxos: UTXO[], targets: Target[], feeRate: number): CoinSelectResult {
+    selectBlackjack(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
         return blackjack(utxos, targets, feeRate);
     }
 
@@ -70,7 +70,7 @@ export class UtxoSelector {
      * @param feeRate - Fee rate in satoshis per byte.
      * @returns Selected inputs, outputs, and estimated fee.
      */
-    selectBreak(utxos: UTXO[], targets: Target[], feeRate: number): CoinSelectResult {
+    selectBreak(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
         return broken(utxos, targets, feeRate);
     }
 
@@ -84,7 +84,7 @@ export class UtxoSelector {
      * @param feeRate - Fee rate in satoshis per byte.
      * @returns Selected inputs, outputs, and estimated fee.
      */
-    selectSplit(utxos: UTXO[], targets: Target[], feeRate: number): CoinSelectResult {
+    selectSplit(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
         return split(utxos, targets, feeRate);
     }
 
@@ -96,7 +96,7 @@ export class UtxoSelector {
      * @param feeRate - Fee rate in satoshis per byte.
      * @returns Selected inputs, outputs, and estimated fee.
      */
-    private selectWithFeeRate(utxos: UTXO[], targets: Target[], feeRate: number): CoinSelectResult {
+    private selectWithFeeRate(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
         switch (this.strategy) {
             case 'accumulative':
                 return this.selectAccumulative(utxos, targets, feeRate);
@@ -115,7 +115,7 @@ export class UtxoSelector {
     /**
      * Selects UTXOs based on either a fee rate or a fixed fee.
      *
-     * @param {UTXO[]} utxos - The list of available unspent transaction outputs.
+     * @param {BitcoinUtxo[]} utxos - The list of available unspent transaction outputs.
      * @param {Target[]} targets - The list of outputs 
      * @param {number} [feeRate] - The fee rate in satoshis per byte (used if fixedFee is not provided).
      * @param {number} [fixedFee] - A fixed total fee in satoshis (overrides feeRate if provided).
@@ -123,7 +123,7 @@ export class UtxoSelector {
      * @throws {Error} - If neither `feeRate` nor `fixedFee` is provided.
      */
     select(
-        utxos: UTXO[],
+        utxos: BitcoinUtxo[],
         targets: Target[],
         feeRate?: number,
         fixedFee?: number
@@ -146,13 +146,13 @@ export class UtxoSelector {
      * Selects UTXOs to meet the target amount using a fixed fee.
      * Internally adjusts the target value to include the fixed fee, then runs standard feeRate-based selection with feeRate = 0.
      *
-     * @param {UTXO[]} utxos - The list of available UTXOs.
+     * @param {BitcoinUtxo[]} utxos - The list of available UTXOs.
      * @param {Target[]} targets - The original transaction output targets.
      * @param {number} fixedFee - The fixed fee amount in satoshis to apply.
      * @returns {CoinSelectResult} - The selection result with inputs, adjusted outputs, and fixed fee.
      */
     private selectWithFixedFee(
-        utxos: UTXO[],
+        utxos: BitcoinUtxo[],
         targets: Target[],
         fixedFee: number
     ): CoinSelectResult {

@@ -1,10 +1,4 @@
 declare module 'coinselect' {
-    export interface UTXO {
-        txId: string;
-        vout: number;
-        value: number;
-        address?: string
-    }
 
     export interface Target {
         address?: string;
@@ -13,13 +7,13 @@ declare module 'coinselect' {
     }
 
     export interface CoinSelectResult {
-        inputs: UTXO[];
+        inputs: BitcoinUtxo[];
         outputs: Target[];
         fee: number;
     }
 
     function coinSelect(
-        utxos: UTXO[],
+        utxos: BitcoinUtxo[],
         targets: Target[],
         feeRate: number
     ): CoinSelectResult;
@@ -28,9 +22,9 @@ declare module 'coinselect' {
 }
 
 declare module 'coinselect/accumulative.js' {
-    import { UTXO, Target, CoinSelectResult } from 'coinselect';
+    import { BitcoinUtxo, Target, CoinSelectResult } from 'coinselect';
     function accumulative(
-        utxos: UTXO[],
+        utxos: BitcoinUtxo[],
         targets: Target[],
         feeRate: number
     ): CoinSelectResult;
@@ -38,9 +32,9 @@ declare module 'coinselect/accumulative.js' {
 }
 
 declare module 'coinselect/blackjack.js' {
-    import { UTXO, Target, CoinSelectResult } from 'coinselect';
+    import { BitcoinUtxo, Target, CoinSelectResult } from 'coinselect';
     function blackjack(
-        utxos: UTXO[],
+        utxos: BitcoinUtxo[],
         targets: Target[],
         feeRate: number
     ): CoinSelectResult;
@@ -48,9 +42,9 @@ declare module 'coinselect/blackjack.js' {
 }
 
 declare module 'coinselect/break.js' {
-    import { UTXO, Target, CoinSelectResult } from 'coinselect';
+    import { BitcoinUtxo, Target, CoinSelectResult } from 'coinselect';
     function broken(
-        utxos: UTXO[],
+        utxos: BitcoinUtxo[],
         targets: Target[],
         feeRate: number
     ): CoinSelectResult;
@@ -58,9 +52,9 @@ declare module 'coinselect/break.js' {
 }
 
 declare module 'coinselect/split.js' {
-    import { UTXO, Target, CoinSelectResult } from 'coinselect';
+    import { BitcoinUtxo, Target, CoinSelectResult } from 'coinselect';
     function split(
-        utxos: UTXO[],
+        utxos: BitcoinUtxo[],
         targets: Target[],
         feeRate: number
     ): CoinSelectResult;

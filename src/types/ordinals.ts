@@ -1,5 +1,5 @@
-import { UTXO } from "coinselect"
 import { BitcoinAddress } from "../wallets/bitcoin/address.js"
+import { BitcoinUtxo } from "./bitcoin.js"
 
 
 
@@ -17,5 +17,5 @@ export type RevelaTransactionParams = {
     from: BitcoinAddress,
     to: string,
     inscription: Inscription,
-    commitUTXO: UTXO,
+    commitUTXO: BitcoinUtxo,
 }

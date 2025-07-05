@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BlockcypherApiProvider } from '../src/providers/bitcoin/blockcypher.js';
+import { BlockcypherApiProvider } from '../src/providers/bitcoin/api/blockcypher.js';
 import { appConfig } from '../src/config.js';
 import { error } from 'console';
 

@@ -4,11 +4,11 @@ import {
     LEAF_VERSION_TAPSCRIPT
 } from 'bitcoinjs-lib/src/payments/bip341.js';
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
-import { UTXO } from 'coinselect';
 import { NetworkType } from '../../types/common.js';
 import { CommitTrasanctionParams, Inscription, RevelaTransactionParams } from '../../types/ordinals.js';
-import { BitcoinRpcProvider } from '../bitcoin/bitcoin-rpc.js';
+import { BitcoinRpcProvider } from '../bitcoin/rpc/bitcoin-rpc.js';
 import { BitcoinTransaction } from '../bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinUtxo } from '../../types/bitcoin.js';
 
 
 
@@ -83,7 +83,7 @@ export class OrdinalProvider {
             txId,
             value: 10000,
             vout: 0
-        } as UTXO;
+        } as BitcoinUtxo;
     }
 
     async reveal(params: RevelaTransactionParams) {

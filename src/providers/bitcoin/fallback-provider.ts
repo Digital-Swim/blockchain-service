@@ -1,12 +1,42 @@
+import { appConfig } from "../../config";
 import { BitcoinAddressInfo, BitcoinApiProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo } from "../../types/bitcoin";
-import { BitcoinRpcProvider } from "./bitcoin-rpc";
+import { NetworkType } from "../../types/common";
+import { BlockcypherApiProvider } from "./api/blockcypher";
+import { BlockstreamApiProvider } from "./api/blockstream";
+import { BitcoinRpcAdapter } from "./bitcoin-rpc-adapter";
+import { BitcoinRpcProvider } from "./rpc/bitcoin-rpc";
 
 export class FallbackBitcoinApiProvider implements BitcoinApiProvider {
+    baseUrl?: string | undefined;
     private providers: BitcoinApiProvider[];
 
-    constructor(providers: BitcoinApiProvider[]) {
-        this.providers = providers;
+    constructor(network: NetworkType, providers?: BitcoinApiProvider[]) {
+
+        if (providers)
+            this.providers = providers;
+        else {
+            const selectedProviders = appConfig.selectedProviders || ["blockstream"];
+
+            this.providers = selectedProviders.flatMap((provider) => {
+                switch (provider) {
+                    case 'blockstream':
+                        return [new BlockstreamApiProvider(network)];
+
+                    case 'blockcypher':
+                        return [new BlockcypherApiProvider(network)];
+
+                    case 'bitcoinNodes':
+                        return appConfig.bitcoinNodes.map((node) =>
+                            new BitcoinRpcAdapter(new BitcoinRpcProvider(node), node.walletName)
+                        );
+
+                    default:
+                        throw new Error(`Unknown provider: ${provider}`);
+                }
+            });
+        }
     }
+
 
     private async tryProviders<T>(methodName: keyof BitcoinApiProvider, ...args: any[]): Promise<T> {
         let lastError: any;
@@ -77,5 +107,12 @@ export class FallbackBitcoinApiProvider implements BitcoinApiProvider {
 
     getFeeEstimates?(): Promise<BitcoinFeeEstimates> {
         return this.tryProviders('getFeeEstimates');
+    }
+
+    getLatestBlock(): Promise<BitcoinBlock> {
+        throw new Error("Method not implemented.");
+    }
+    getBalance(address: string): Promise<number> {
+        throw new Error("Method not implemented.");
     }
 }

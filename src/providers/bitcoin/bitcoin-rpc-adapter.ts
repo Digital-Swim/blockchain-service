@@ -2,12 +2,13 @@ import {
     BitcoinAddressInfo,
     BitcoinApiProvider,
     BitcoinBlock,
+    BitcoinFeeEstimates,
     BitcoinMempoolInfo,
     BitcoinTransaction,
     BitcoinUtxo
 } from "../../types/bitcoin";
 
-import { BitcoinRpcProvider } from "./bitcoin-rpc";
+import { BitcoinRpcProvider } from "./rpc/bitcoin-rpc";
 
 export class BitcoinRpcAdapter implements BitcoinApiProvider {
     private walletName: string;
@@ -17,6 +18,7 @@ export class BitcoinRpcAdapter implements BitcoinApiProvider {
         this.rpc = rpc;
         this.walletName = walletName;
     }
+    baseUrl?: string | undefined;
 
     async getBlockchainInfo(): Promise<any> {
         return this.rpc.getBlockchainInfo();
@@ -54,18 +56,31 @@ export class BitcoinRpcAdapter implements BitcoinApiProvider {
     }
 
     async getAddressInfo(address: string): Promise<BitcoinAddressInfo> {
-        return this.rpc.call("getaddressinfo", [address]);
+        throw new Error("Not implemented")
     }
 
     async getAddressUtxos(address: string): Promise<BitcoinUtxo[]> {
-        return []
+        return this.rpc.listUnspentAddress(this.walletName, address)
     }
 
     async getMempoolInfo(): Promise<BitcoinMempoolInfo> {
         return this.rpc.call("getmempoolinfo");
     }
 
-    getAddressFull?(): Promise<BitcoinTransaction[]> {
-        return Promise.resolve([]); // Optional and unsupported
+    async getAddressFull(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]> {
+        return Promise.resolve([]);
     }
+
+    async getLatestBlock(): Promise<BitcoinBlock> {
+        throw new Error("Method not implemented.");
+    }
+
+    async getBalance(address: string): Promise<number> {
+        throw new Error("Method not implemented.");
+    }
+
+    async getFeeEstimates(): Promise<BitcoinFeeEstimates> {
+        throw new Error("Method not implemented.");
+    }
+
 }

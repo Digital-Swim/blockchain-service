@@ -32,5 +32,6 @@ export const appConfig: AppConfig = {
     },
     coingecko: {
         base: process.env.COINGECKO_API_URL || 'https://api.coingecko.com/api/v3'
-    }
+    },
+    selectedProviders: ['bitcoinNodes', 'blockcypher', 'blockstream']
 }

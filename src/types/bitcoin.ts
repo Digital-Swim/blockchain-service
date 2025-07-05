@@ -1,4 +1,4 @@
-import { Target, UTXO } from "coinselect";
+import { Target } from "coinselect";
 import { BitcoinAddress } from "../wallets/bitcoin/address";
 
 export type UtxoSelectStrategy = 'default' | 'accumulative' | 'blackjack' | 'break' | 'split';
@@ -6,8 +6,10 @@ export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr';
 export type BitcoinCoreAddressType = 'legacy' | 'p2sh-segwit' | 'bech32' | 'bech32m';
 
 export interface BitcoinApiProvider {
+    baseUrl?:string;
     getBlockchainInfo(): Promise<any>; // Optional: Define a type later
 
+    getLatestBlock(): Promise<BitcoinBlock>
     getBlockAtHeight(height: number): Promise<BitcoinBlock[]>;
     getBlockByHash(hash: string): Promise<BitcoinBlock>;
     getBlockTxs(hash: string, txStart?: number): Promise<string[]>;
@@ -22,6 +24,7 @@ export interface BitcoinApiProvider {
     getAddressFull?(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]>;
     getAddressUtxos(address: string): Promise<BitcoinUtxo[]>;
 
+    getBalance(address: string): Promise<number>;
     getMempoolInfo?(): Promise<BitcoinMempoolInfo>;
     getFeeEstimates?(): Promise<BitcoinFeeEstimates>;
 }
@@ -83,13 +86,16 @@ export interface BitcoinTransaction {
 }
 
 export interface BitcoinUtxo {
-    txid: string;
+    txId: string;
     vout: number;
     value: number;
-    confirmations: number;
-    scriptPubKey: string;
+    confirmations?: number;
+    scriptPubKey?: string;
     status?: BitcoinTxStatus
+    address?: string
 }
+
+
 
 export interface BitcoinFeeEstimates {
     low: number;
@@ -124,7 +130,7 @@ export type BitcoinTransactionParams = {
     from: BitcoinAddress | string;
     toAddress: string;
     amountSats: number;
-    utxos: UTXO[];
+    utxos: BitcoinUtxo[];
     fixedFee?: number;
     feeRate?: number;
     utxoSelectStrategy?: UtxoSelectStrategy;
@@ -132,7 +138,7 @@ export type BitcoinTransactionParams = {
 
 export type BitcoinTransactionResult = {
     hex: string;
-    inputs: UTXO[];
+    inputs: BitcoinUtxo[];
     outputs: Target[];
     fee: number;
 };

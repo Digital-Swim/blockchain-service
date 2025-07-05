@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BlockstreamApiProvider } from '../src/providers/bitcoin/blockstream.js';
+import { BlockstreamApiProvider } from '../src/providers/bitcoin/api/blockstream.js';
 import { appConfig } from '../src/config.js';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

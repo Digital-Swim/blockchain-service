@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { UTXO } from 'coinselect';
 import { before, describe, it } from 'mocha';
 import { appConfig } from '../src/config.js';
-import { BitcoinRpcProvider } from '../src/providers/bitcoin/bitcoin-rpc.js';
+import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
+import { BitcoinUtxo } from '../src/types/bitcoin.js';
 
 const rpc = new BitcoinRpcProvider({
     url: 'http://127.0.0.1:18443',
@@ -61,7 +61,7 @@ describe('BitcoinRpcClient', function () {
     it('should create, sign and send raw transaction', async () => {
 
         const utxos = await rpc.listUnspentAddress(walletName, address);
-        const utxo: UTXO | undefined = utxos.find((u: UTXO) => u.value! >= 0.1);
+        const utxo: BitcoinUtxo | undefined = utxos.find((u: BitcoinUtxo) => u.value! >= 0.1);
 
         if (!utxo) throw new Error('No UTXO found with enough balance');
 

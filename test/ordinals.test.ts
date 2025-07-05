@@ -1,4 +1,4 @@
-import { BitcoinRpcProvider } from '../src/providers/bitcoin/bitcoin-rpc.js';
+import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
 import { OrdinalProvider } from '../src/providers/ordinals/ordnials.js';
 import { NetworkType } from '../src/types/common.js';
 import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';

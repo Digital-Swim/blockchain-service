@@ -1,10 +1,9 @@
-import { UTXO } from "coinselect";
-import { Rpc } from "../utils/rpc.js";
-import { BitcoinCoreAddressType } from "../../types/bitcoin.js";
+import { Rpc } from "../../utils/rpc.js";
+import { BitcoinCoreAddressType, BitcoinUtxo } from "../../../types/bitcoin.js";
 
 export class BitcoinRpcProvider extends Rpc {
 
-    private normalizeUTXO(raw: any): UTXO {
+    private normalizeUTXO(raw: any): BitcoinUtxo {
         return {
             txId: raw.txId ?? raw.txid,           // accept either `txId` or `txid`
             vout: raw.vout,
@@ -66,7 +65,7 @@ export class BitcoinRpcProvider extends Rpc {
         return this.call('sendtoaddress', [address, amount], path);
     }
 
-    listUnspent(walletName: string): Promise<UTXO[]> {
+    listUnspent(walletName: string): Promise<BitcoinUtxo[]> {
         return new Promise((resolve, reject) => {
             this.call<any[]>('listunspent', [], `/wallet/${walletName}`)
                 .then(rawUtxos => {
@@ -77,9 +76,9 @@ export class BitcoinRpcProvider extends Rpc {
         });
     }
 
-    listUnspentAddress(walletName: string, address: string): Promise<UTXO[]> {
+    listUnspentAddress(walletName: string, address: string): Promise<BitcoinUtxo[]> {
         return new Promise((resolve, reject) => {
-            this.listUnspent(walletName).then((utxos: UTXO[]) => {
+            this.listUnspent(walletName).then((utxos: BitcoinUtxo[]) => {
                 return utxos.filter(utxo => utxo.address! == address)
             }).then(utxos => resolve(utxos)).catch(e => reject(e));
         })

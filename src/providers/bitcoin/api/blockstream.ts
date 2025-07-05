@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { appConfig } from '../../config.js';
+import { appConfig } from '../../../config.js';
 import {
     BitcoinBlock,
     BitcoinTransaction,
@@ -11,12 +11,12 @@ import {
     BitcoinTxOutput,
     BitcoinTxInput,
     BitcoinApiProvider
-} from '../../types/bitcoin.js';
+} from '../../../types/bitcoin.js';
 
-import {  NetworkType } from '../../types/common.js';
+import { NetworkType } from '../../../types/common.js';
 
 export class BlockstreamApiProvider implements BitcoinApiProvider {
-    private baseUrl: string;
+    baseUrl?: string;
 
     constructor(network: NetworkType) {
         this.baseUrl =
@@ -163,33 +163,37 @@ export class BlockstreamApiProvider implements BitcoinApiProvider {
     }
 
 
-    async getAddressFull(address: string, limit = 50): Promise<BitcoinTransaction[]> {
+
+    async getAddressFull(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]> {
+        if (!limit) limit = 50;
         const res = await axios.get(`${this.baseUrl}/address/${address}/txs?limit=${limit}`);
-        return res.data.map((tx: any) => ({
-            txid: tx.txid,
-            size: tx.size,
-            weight: tx.weight,
-            fee: tx.fee,
-            confirmations: tx.confirmations,
-            status: {
-                confirmed: tx.status.confirmed,
-                blockHeight: tx.status.block_height,
-                blockHash: tx.status.block_hash,
-                blockTime: tx.status.block_time,
-            },
-            vin: tx.vin.map((input: any) => ({
-                txid: input.txid,
-                vout: input.vout,
-                addresses: input.addresses,
-                value: input.value,
-            })),
-            vout: tx.vout.map((output: any) => ({
-                value: output.value,
-                n: output.n,
-                addresses: output.addresses,
-                scriptPubKey: output.scriptPubKey,
-            })),
-        }));
+        if (res?.data)
+            return res.data.map((tx: any) => ({
+                txid: tx.txid,
+                size: tx.size,
+                weight: tx.weight,
+                fee: tx.fee,
+                confirmations: tx.confirmations,
+                status: {
+                    confirmed: tx.status.confirmed,
+                    blockHeight: tx.status.block_height,
+                    blockHash: tx.status.block_hash,
+                    blockTime: tx.status.block_time,
+                },
+                vin: tx.vin.map((input: any) => ({
+                    txid: input.txid,
+                    vout: input.vout,
+                    addresses: input.addresses,
+                    value: input.value,
+                })),
+                vout: tx.vout.map((output: any) => ({
+                    value: output.value,
+                    n: output.n,
+                    addresses: output.addresses,
+                    scriptPubKey: output.scriptPubKey,
+                })),
+            }));
+        return [];
     }
 
     async getMempoolInfo(): Promise<BitcoinMempoolInfo> {

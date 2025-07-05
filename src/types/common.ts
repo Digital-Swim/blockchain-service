@@ -45,6 +45,8 @@ export interface AppConfig {
   coingecko: CoingeckoConfig;
   blockcypher: BlockCypherConfig;
   bitcoinNodes: RpcConfig[]
+  selectedProviders: BitcoinProviderOptions[]
 }
 
+export type BitcoinProviderOptions = "blockstream" | "blockcypher" | "bitcoinNodes"
 
