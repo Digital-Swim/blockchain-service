@@ -9,6 +9,7 @@ import { CommitTrasanctionParams, Inscription, RevelaTransactionParams } from '.
 import { BitcoinRpcProvider } from '../bitcoin/rpc/bitcoin-rpc.js';
 import { BitcoinTransaction } from '../bitcoin/utils/bitcoin-transaction.js';
 import { BitcoinUtxo } from '../../types/bitcoin.js';
+import { getNetwork } from '../utils/common.js';
 
 
 
@@ -25,7 +26,7 @@ export class OrdinalProvider {
     });
 
     constructor(network: NetworkType) {
-        this.network = BitcoinTransaction.getNetwork(network)
+        this.network = getNetwork(network)
     }
 
     inscribe() {

@@ -2,11 +2,11 @@ import { Target } from "coinselect";
 import { BitcoinAddress } from "../wallets/bitcoin/address";
 
 export type UtxoSelectStrategy = 'default' | 'accumulative' | 'blackjack' | 'break' | 'split';
-export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr';
+export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr' | 'p2wsh';
 export type BitcoinCoreAddressType = 'legacy' | 'p2sh-segwit' | 'bech32' | 'bech32m';
 
 export interface BitcoinApiProvider {
-    baseUrl?:string;
+    baseUrl?: string;
     getBlockchainInfo(): Promise<any>; // Optional: Define a type later
 
     getLatestBlock(): Promise<BitcoinBlock>

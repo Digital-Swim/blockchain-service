@@ -14,7 +14,7 @@ export class Bitcoin {
         this.fallBackApiProvider = new FallbackBitcoinApiProvider(network);
     }
 
-    async send(params: BitcoinParams, useRPCNode: boolean = false): Promise<any> {
+    async send(params: BitcoinParams): Promise<any> {
 
         const { amountSats, from, key: { wif, privateKey }, to, feeRate, fixedFee, utxoSelectStrategy } = params
 

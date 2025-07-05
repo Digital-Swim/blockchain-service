@@ -1,10 +1,10 @@
-import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import * as ecc from 'tiny-secp256k1';
+import * as bip39 from 'bip39';
 import * as bitcoin from 'bitcoinjs-lib';
-import { BitcoinAddress } from './address.js';
+import * as ecc from 'tiny-secp256k1';
+import { getNetwork } from '../../providers/utils/common.js';
 import { NetworkType } from '../../types/common.js';
-import { BitcoinTransaction } from '../../providers/bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinAddress } from './address.js';
 
 const BIP32 = bip32.BIP32Factory(ecc);
 export class BitcoinWallet {
@@ -17,7 +17,7 @@ export class BitcoinWallet {
 
     constructor(mnemonic?: string, network: NetworkType = 'mainnet') {
 
-        this.network = BitcoinTransaction.getNetwork(network)
+        this.network = getNetwork(network)
 
         if (!mnemonic) {
             mnemonic = bip39.generateMnemonic();
@@ -47,13 +47,13 @@ export class BitcoinWallet {
     }
 
     //Native SegWit single-sig
-
     getDescriptor(accountIndex = 0): string {
         const derivationPath = `84'/${this.cointtype}'/${accountIndex}'`;
         const fingerprint = Buffer.from(this.root.fingerprint).toString('hex').toUpperCase();
         const xprv = this.root.derivePath(derivationPath).toBase58();
         return `wpkh([${fingerprint}/${derivationPath}]${xprv}/0/*)`;
     }
+
     getAddress(index: number, change: number = 0, accountIndex: number = 0): BitcoinAddress {
         const path = `m/84'/${this.cointtype}'/${accountIndex}'/${change}/${index}`;
         const child = this.root.derivePath(path);

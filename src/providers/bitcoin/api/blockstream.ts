@@ -162,8 +162,6 @@ export class BlockstreamApiProvider implements BitcoinApiProvider {
         return info.balance;
     }
 
-
-
     async getAddressFull(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]> {
         if (!limit) limit = 50;
         const res = await axios.get(`${this.baseUrl}/address/${address}/txs?limit=${limit}`);

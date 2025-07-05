@@ -1,6 +1,6 @@
+import * as bip32 from 'bip32';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bitcoinMessage from 'bitcoinjs-message';
-import * as bip32 from 'bip32';
 import { ECPairAPI, ECPairFactory, ECPairInterface } from "ecpair";
 import * as ecc from 'tiny-secp256k1';
 import { NetworkType } from '../../types/common.js';
@@ -10,7 +10,7 @@ import {
 } from 'bitcoinjs-lib/src/psbt/bip371.js';
 
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
-import { BitcoinTransaction } from '../../providers/bitcoin/utils/bitcoin-transaction.js';
+import { getNetwork } from '../../providers/utils/common.js';
 import { BitcoinAddressType } from '../../types/bitcoin.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
@@ -19,19 +19,22 @@ bitcoin.initEccLib(ecc);
 
 export class BitcoinAddress {
 
+    address?: string;
     private keyPair: ECPairInterface;
     private network: bitcoin.Network;
 
     constructor(options?: {
+        address?: string;
         wif?: string;
         privateKey?: string | Buffer;
         network?: NetworkType | bitcoin.Network;
     }) {
 
-        const { wif, privateKey, network = "mainnet" } = options || {};
+        const { address, wif, privateKey, network = "mainnet" } = options || {};
 
+        this.address = address;
         this.network = typeof network === 'string'
-            ? BitcoinTransaction.getNetwork(network)
+            ? getNetwork(network)
             : (network ?? bitcoin.networks.bitcoin);
 
         if (wif) {
@@ -162,6 +165,5 @@ export class BitcoinAddress {
         const signature = Buffer.from(signatureBase64, 'base64');
         return bitcoinMessage.verify(message, address, signature, network.messagePrefix);
     }
-
 
 }
