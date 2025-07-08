@@ -42,7 +42,12 @@ export class LocalUtxoManager implements UtxoManager {
     }
 
     // Get all unspent UTXOs for an address
-    async getUnspentUtxos(address?: string): Promise<BitcoinUtxo[]> {
+    async getUnspentUtxos(address: string, fromNetwork: boolean = false): Promise<BitcoinUtxo[]> {
+
+        if (fromNetwork) {
+            return this.reset(address);
+        }
+
         const sql = `
             SELECT txid AS txId, vout, amount AS value, confirmations, script_pub_key AS scriptPubKey, status, address, spent_in_txid AS spentInTxId
             FROM utxos
@@ -73,7 +78,7 @@ export class LocalUtxoManager implements UtxoManager {
     }
 
     // Get total balance of unspent UTXOs for an address
-    async getTotalBalance(address?: string): Promise<number> {
+    async getTotalBalance(address: string): Promise<number> {
         const sql = `
             SELECT COALESCE(SUM(amount), 0) as balance
             FROM utxos
@@ -83,13 +88,15 @@ export class LocalUtxoManager implements UtxoManager {
         return rows[0]?.balance ?? 0;
     }
 
-    async deleteUtxos(address?: string): Promise<void> {
+    async deleteUtxos(address: string): Promise<void> {
         const sql = `DELETE FROM utxos WHERE address = ?`;
         await db.query(sql, [address!]);
     }
 
 
-    async reset(address?: string) {
+    async reset(address: string): Promise<BitcoinUtxo[]> {
+
+        if (!this.bitcoinProvider) throw new Error("bitcoin provider not set for address class object");
 
         const utxos = await this.bitcoinProvider?.getAddressUtxos(address!)
         await this.deleteUtxos(address!)
@@ -97,6 +104,7 @@ export class LocalUtxoManager implements UtxoManager {
         if (utxos?.length)
             this.addUtxos(utxos!);
 
+        return utxos;
     }
 }
 

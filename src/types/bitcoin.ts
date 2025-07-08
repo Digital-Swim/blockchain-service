@@ -7,12 +7,12 @@ export type BitcoinCoreAddressType = 'legacy' | 'p2sh-segwit' | 'bech32' | 'bech
 
 export interface UtxoManager {
     addUtxos(utxos: BitcoinUtxo[]): Promise<void>;
-    getUnspentUtxos(address: string): Promise<BitcoinUtxo[]>;
+    getUnspentUtxos(address: string, fromNetwork: boolean): Promise<BitcoinUtxo[]>;
     markUtxoAsSpent(txId: string, vout: number, spentInTxid: string): Promise<void>;
     markUtxoAsConfirmed(txId: string, vout: number, confirmations: number): Promise<void>;
     getTotalBalance(address: string): Promise<number>;
     deleteUtxos(address: string): Promise<void>;
-    reset(address: string): Promise<void>;
+    reset(address: string): Promise<BitcoinUtxo[]>;
 }
 
 export interface BitcoinProvider {

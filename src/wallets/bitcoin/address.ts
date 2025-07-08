@@ -170,7 +170,7 @@ export class BitcoinAddress {
 
         return {
             addUtxos: (utxos: BitcoinUtxo[]) => manager.addUtxos(utxos),
-            getUnspentUtxos: () => manager.getUnspentUtxos(address),
+            getUnspentUtxos: (fromNetwork: boolean = false) => manager.getUnspentUtxos(address, fromNetwork),
             markUtxoAsSpent: (txId: string, vout: number, spentInTxid: string) =>
                 manager.markUtxoAsSpent(txId, vout, spentInTxid),
             markUtxoAsConfirmed: (txId: string, vout: number, confirmations: number) =>

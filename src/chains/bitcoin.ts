@@ -22,14 +22,7 @@ export class Bitcoin {
         const from = new BitcoinAddress({ address: fromAddress, wif, privateKey, network: this.network }, new LocalUtxoManager(this.fallBackBitcoinProvider));
 
         // Get Utxos 
-        const utxosArr = await from.getUtxoManager().getUnspentUtxos();
-
-        const utxos = utxosArr.map(bu => ({
-            txId: bu.txId,
-            vout: bu.vout,
-            value: bu.value
-        } as BitcoinUtxo));
-
+        const utxos = await from.getUtxoManager().getUnspentUtxos();
 
         const tx: BitcoinTransactionResult = await BitcoinTransaction.create({
             amountSats,
