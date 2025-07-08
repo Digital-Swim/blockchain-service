@@ -1,6 +1,7 @@
 import * as bitcoin from "bitcoinjs-lib";
 import { NetworkType } from "../../types/common.js";
 import { BitcoinAddressType } from "../../types/bitcoin.js";
+import * as bitcoinMessage from 'bitcoinjs-message';
 
 export const getNetwork = (network: NetworkType) => {
     return network === 'mainnet' ? bitcoin.networks.bitcoin : network === 'testnet' ? bitcoin.networks.testnet : network === 'regtest' ? bitcoin.networks.regtest : (() => { throw new Error(`Unsupported network: ${network}`); })();
@@ -24,4 +25,14 @@ export const getAddressType = (address: string, networkType: NetworkType | bitco
     } catch { }
 
     throw new Error('Unsupported or invalid Bitcoin address');
+}
+
+export const verifyMessage = (
+    message: string,
+    address: string,
+    signatureBase64: string,
+    network: bitcoin.Network = bitcoin.networks.bitcoin
+): boolean => {
+    const signature = Buffer.from(signatureBase64, 'base64');
+    return bitcoinMessage.verify(message, address, signature, network.messagePrefix);
 }

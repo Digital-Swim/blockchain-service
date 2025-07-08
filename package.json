@@ -35,6 +35,7 @@
     "coinselect": "^3.1.13",
     "dotenv": "^16.5.0",
     "ecpair": "^3.0.0",
+    "mysql2": "^3.14.1",
     "ordinals": "^1.0.1",
     "tiny-secp256k1": "^2.2.3"
   }

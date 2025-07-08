@@ -91,9 +91,9 @@ export interface BitcoinUtxo {
     confirmations?: number;
     scriptPubKey?: string;
     status?: BitcoinTxStatus
-    address?: string
+    address?: string;
+    spentInTxId?: string;
 }
-
 
 
 export interface BitcoinFeeEstimates {

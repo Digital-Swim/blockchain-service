@@ -3,6 +3,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { BitcoinWallet } from '../src/wallets/bitcoin/wallet.js';
 import { NetworkType } from '../src/types/common.js';
 import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
+import { verifyMessage } from '../src/providers/utils/common.js';
 
 const supportedNetworks: NetworkType[] = ['mainnet', 'testnet', 'regtest'];
 
@@ -54,7 +55,7 @@ describe('BitcoinWallet across networks', () => {
                 const addr = address.getAddress('p2pkh');
                 const msg = `test message on ${networkName}`;
                 const sig = address.signMessage(msg);
-                const isValid = BitcoinAddress.verifyMessage(msg, addr, sig, network);
+                const isValid = verifyMessage(msg, addr, sig, network);
                 expect(isValid).to.be.true;
             });
 
@@ -62,7 +63,7 @@ describe('BitcoinWallet across networks', () => {
                 const other = new BitcoinAddress({ network });
                 const msg = 'wrong verify';
                 const sig = address.signMessage(msg);
-                const isValid = BitcoinAddress.verifyMessage(msg, other.getAddress('p2pkh'), sig, network);
+                const isValid = verifyMessage(msg, other.getAddress('p2pkh'), sig, network);
                 expect(isValid).to.be.false;
             });
 

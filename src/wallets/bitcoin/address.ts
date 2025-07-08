@@ -11,7 +11,8 @@ import {
 
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
 import { getNetwork } from '../../providers/utils/common.js';
-import { BitcoinAddressType } from '../../types/bitcoin.js';
+import { BitcoinAddressType, BitcoinUtxo } from '../../types/bitcoin.js';
+import { UtxoManager } from '../../providers/bitcoin/utils/utxo-manager.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);
@@ -156,14 +157,27 @@ export class BitcoinAddress {
         };
     }
 
-    static verifyMessage(
-        message: string,
-        address: string,
-        signatureBase64: string,
-        network: bitcoin.Network = bitcoin.networks.bitcoin
-    ): boolean {
-        const signature = Buffer.from(signatureBase64, 'base64');
-        return bitcoinMessage.verify(message, address, signature, network.messagePrefix);
+    utxoManager() {
+
+        const manager = new UtxoManager();
+        const address = this.address!;
+
+        return {
+
+            getUnspentUtxos: async () => {
+                if (!address) throw new Error("Address is not set for this object");
+                return await manager.getUnspentUtxos(address);
+            },
+
+            markUtxoAsSpent: async (txId: string, vout: number, spentInTxid: string) => {
+                return await manager.markUtxoAsSpent(txId, vout, spentInTxid);
+            },
+
+            addUtxo: async (utxo: BitcoinUtxo) => {
+                return await manager.addUtxo(utxo);
+            }
+           
+        };
     }
 
 }

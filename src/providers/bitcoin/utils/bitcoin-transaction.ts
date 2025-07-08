@@ -24,7 +24,7 @@ export class BitcoinTransaction {
 
         if (typeof from === "string") throw new Error("Invalid from param, must be an object of BitcoinAddress class");
         if (!utxos?.length) throw new Error('No UTXOs available');
-        if (!from.address) throw new Error("Address not provided for source address objec, make sure that address is set with BitcoinAddres object");
+        if (!from.address) throw new Error("Address not provided for source address object, make sure that address is set with BitcoinAddres object");
 
         const btcNetwork = (typeof network === "string") ? getNetwork(network) : network;
         const fromAddress = from.address!;
