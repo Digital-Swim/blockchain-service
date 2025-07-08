@@ -1,10 +1,10 @@
-import { appConfig } from "../../config";
-import { BitcoinAddressInfo, BitcoinApiProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo } from "../../types/bitcoin";
-import { NetworkType } from "../../types/common";
-import { BlockcypherApiProvider } from "./api/blockcypher";
-import { BlockstreamApiProvider } from "./api/blockstream";
-import { BitcoinRpcAdapter } from "./bitcoin-rpc-adapter";
-import { BitcoinRpcProvider } from "./rpc/bitcoin-rpc";
+import { appConfig } from "../../config.js";
+import { BitcoinAddressInfo, BitcoinApiProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo } from "../../types/bitcoin.js";
+import { NetworkType } from "../../types/common.js";
+import { BlockcypherApiProvider } from "./api/blockcypher.js";
+import { BlockstreamApiProvider } from "./api/blockstream.js";
+import { BitcoinRpcAdapter } from "./bitcoin-rpc-adapter.js";
+import { BitcoinRpcProvider } from "./rpc/bitcoin-rpc.js";
 
 export class FallbackBitcoinApiProvider implements BitcoinApiProvider {
     baseUrl?: string | undefined;

@@ -30,7 +30,6 @@ export interface BitcoinApiProvider {
 }
 
 export type BitcoinKey = {
-    type: BitcoinAddressType,
     wif?: string,
     privateKey?: string
 }
