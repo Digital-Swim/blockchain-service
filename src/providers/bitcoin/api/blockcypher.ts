@@ -10,11 +10,11 @@ import {
     BitcoinTxStatus,
     BitcoinTxInput,
     BitcoinTxOutput,
-    BitcoinApiProvider,
+    BitcoinProvider,
 } from '../../../types/bitcoin.js';
 import { appConfig } from '../../../config.js';
 
-export class BlockcypherApiProvider implements BitcoinApiProvider {
+export class BlockcypherApiProvider implements BitcoinProvider {
     baseUrl?: string;
 
     constructor(network: NetworkType) {

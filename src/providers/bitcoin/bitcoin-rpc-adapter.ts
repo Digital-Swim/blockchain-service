@@ -1,6 +1,6 @@
 import {
     BitcoinAddressInfo,
-    BitcoinApiProvider,
+    BitcoinProvider,
     BitcoinBlock,
     BitcoinFeeEstimates,
     BitcoinMempoolInfo,
@@ -10,7 +10,7 @@ import {
 
 import { BitcoinRpcProvider } from "./rpc/bitcoin-rpc";
 
-export class BitcoinRpcAdapter implements BitcoinApiProvider {
+export class BitcoinRpcAdapter implements BitcoinProvider {
     private walletName: string;
     private rpc: BitcoinRpcProvider;
 

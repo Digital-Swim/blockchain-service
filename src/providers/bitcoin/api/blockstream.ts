@@ -10,12 +10,12 @@ import {
     BitcoinTxStatus,
     BitcoinTxOutput,
     BitcoinTxInput,
-    BitcoinApiProvider
+    BitcoinProvider
 } from '../../../types/bitcoin.js';
 
 import { NetworkType } from '../../../types/common.js';
 
-export class BlockstreamApiProvider implements BitcoinApiProvider {
+export class BlockstreamApiProvider implements BitcoinProvider {
     baseUrl?: string;
 
     constructor(network: NetworkType) {

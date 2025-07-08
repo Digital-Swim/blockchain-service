@@ -1,16 +1,16 @@
 import { appConfig } from "../../config.js";
-import { BitcoinAddressInfo, BitcoinApiProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo } from "../../types/bitcoin.js";
+import { BitcoinAddressInfo, BitcoinProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo } from "../../types/bitcoin.js";
 import { NetworkType } from "../../types/common.js";
 import { BlockcypherApiProvider } from "./api/blockcypher.js";
 import { BlockstreamApiProvider } from "./api/blockstream.js";
 import { BitcoinRpcAdapter } from "./bitcoin-rpc-adapter.js";
 import { BitcoinRpcProvider } from "./rpc/bitcoin-rpc.js";
 
-export class FallbackBitcoinApiProvider implements BitcoinApiProvider {
+export class FallbackBitcoinProvider implements BitcoinProvider {
     baseUrl?: string | undefined;
-    private providers: BitcoinApiProvider[];
+    private providers: BitcoinProvider[];
 
-    constructor(network: NetworkType, providers?: BitcoinApiProvider[]) {
+    constructor(network: NetworkType, providers?: BitcoinProvider[]) {
 
         if (providers)
             this.providers = providers;
@@ -38,7 +38,7 @@ export class FallbackBitcoinApiProvider implements BitcoinApiProvider {
     }
 
 
-    private async tryProviders<T>(methodName: keyof BitcoinApiProvider, ...args: any[]): Promise<T> {
+    private async tryProviders<T>(methodName: keyof BitcoinProvider, ...args: any[]): Promise<T> {
         let lastError: any;
         for (const provider of this.providers) {
             const method = provider[methodName];
@@ -112,7 +112,9 @@ export class FallbackBitcoinApiProvider implements BitcoinApiProvider {
     getLatestBlock(): Promise<BitcoinBlock> {
         throw new Error("Method not implemented.");
     }
+
     getBalance(address: string): Promise<number> {
         throw new Error("Method not implemented.");
     }
+
 }

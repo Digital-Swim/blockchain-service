@@ -1,5 +1,6 @@
-import { FallbackBitcoinApiProvider } from "../providers/bitcoin/fallback-provider.js";
+import { FallbackBitcoinProvider } from "../providers/bitcoin/fallback-provider.js";
 import { BitcoinTransaction } from "../providers/bitcoin/utils/bitcoin-transaction.js";
+import { LocalUtxoManager } from "../providers/bitcoin/utils/utxo-manager.js";
 import { BitcoinParams, BitcoinTransactionResult, BitcoinUtxo } from "../types/bitcoin.js";
 import { NetworkType } from "../types/common.js";
 import { BitcoinAddress } from "../wallets/bitcoin/address.js";
@@ -7,19 +8,21 @@ import { BitcoinAddress } from "../wallets/bitcoin/address.js";
 export class Bitcoin {
 
     private network: NetworkType
-    private fallBackApiProvider: FallbackBitcoinApiProvider;
+    private fallBackBitcoinProvider: FallbackBitcoinProvider;
 
     constructor(network: NetworkType) {
         this.network = network;
-        this.fallBackApiProvider = new FallbackBitcoinApiProvider(network);
+        this.fallBackBitcoinProvider = new FallbackBitcoinProvider(network);
     }
 
     async send(params: BitcoinParams): Promise<any> {
 
         const { amountSats, from: fromAddress, key: { wif, privateKey }, to, feeRate, fixedFee, utxoSelectStrategy } = params
 
+        const from = new BitcoinAddress({ address: fromAddress, wif, privateKey, network: this.network }, new LocalUtxoManager(this.fallBackBitcoinProvider));
+
         // Get Utxos 
-        const utxosArr = await this.fallBackApiProvider.getAddressUtxos(fromAddress);
+        const utxosArr = await from.getUtxoManager().getUnspentUtxos();
 
         const utxos = utxosArr.map(bu => ({
             txId: bu.txId,
@@ -27,7 +30,6 @@ export class Bitcoin {
             value: bu.value
         } as BitcoinUtxo));
 
-        const from = new BitcoinAddress({ address: fromAddress, wif, privateKey, network: this.network });
 
         const tx: BitcoinTransactionResult = await BitcoinTransaction.create({
             amountSats,
@@ -42,7 +44,7 @@ export class Bitcoin {
         console.log(JSON.stringify(tx))
 
         // Publish 
-        const txid = await this.fallBackApiProvider.broadcastTransaction(tx.hex);
+        const txid = await this.fallBackBitcoinProvider.broadcastTransaction(tx.hex);
 
         console.log(txid)
 

@@ -11,8 +11,8 @@ import {
 
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
 import { getNetwork } from '../../providers/utils/common.js';
-import { BitcoinAddressType, BitcoinUtxo } from '../../types/bitcoin.js';
-import { UtxoManager } from '../../providers/bitcoin/utils/utxo-manager.js';
+import { BitcoinAddressType, BitcoinProvider, BitcoinUtxo, UtxoManager } from '../../types/bitcoin.js';
+import { LocalUtxoManager } from '../../providers/bitcoin/utils/utxo-manager.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);
@@ -21,6 +21,7 @@ bitcoin.initEccLib(ecc);
 export class BitcoinAddress {
 
     address?: string;
+    private utxoManager?: UtxoManager;
     private keyPair: ECPairInterface;
     private network: bitcoin.Network;
 
@@ -29,11 +30,13 @@ export class BitcoinAddress {
         wif?: string;
         privateKey?: string | Buffer;
         network?: NetworkType | bitcoin.Network;
-    }) {
+    }, utxoManager?: UtxoManager) {
 
         const { address, wif, privateKey, network = "mainnet" } = options || {};
 
         this.address = address;
+        this.utxoManager = utxoManager;
+
         this.network = typeof network === 'string'
             ? getNetwork(network)
             : (network ?? bitcoin.networks.bitcoin);
@@ -157,26 +160,24 @@ export class BitcoinAddress {
         };
     }
 
-    utxoManager() {
+    getUtxoManager() {
 
-        const manager = new UtxoManager();
+        if (!this.address) throw new Error("Address not set ");
+        if (!this.utxoManager) throw new Error("Utxo manager not set");
+
         const address = this.address!;
+        const manager = this.utxoManager!;
 
         return {
-
-            getUnspentUtxos: async () => {
-                if (!address) throw new Error("Address is not set for this object");
-                return await manager.getUnspentUtxos(address);
-            },
-
-            markUtxoAsSpent: async (txId: string, vout: number, spentInTxid: string) => {
-                return await manager.markUtxoAsSpent(txId, vout, spentInTxid);
-            },
-
-            addUtxo: async (utxo: BitcoinUtxo) => {
-                return await manager.addUtxo(utxo);
-            }
-           
+            addUtxos: (utxos: BitcoinUtxo[]) => manager.addUtxos(utxos),
+            getUnspentUtxos: () => manager.getUnspentUtxos(address),
+            markUtxoAsSpent: (txId: string, vout: number, spentInTxid: string) =>
+                manager.markUtxoAsSpent(txId, vout, spentInTxid),
+            markUtxoAsConfirmed: (txId: string, vout: number, confirmations: number) =>
+                manager.markUtxoAsConfirmed(txId, vout, confirmations),
+            getTotalBalance: () => manager.getTotalBalance(address),
+            deleteUtxosByAddress: () => manager.deleteUtxos(address),
+            reset: () => manager.reset(address),
         };
     }
 

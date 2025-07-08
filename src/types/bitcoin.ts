@@ -5,7 +5,17 @@ export type UtxoSelectStrategy = 'default' | 'accumulative' | 'blackjack' | 'bre
 export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr' | 'p2wsh';
 export type BitcoinCoreAddressType = 'legacy' | 'p2sh-segwit' | 'bech32' | 'bech32m';
 
-export interface BitcoinApiProvider {
+export interface UtxoManager {
+    addUtxos(utxos: BitcoinUtxo[]): Promise<void>;
+    getUnspentUtxos(address: string): Promise<BitcoinUtxo[]>;
+    markUtxoAsSpent(txId: string, vout: number, spentInTxid: string): Promise<void>;
+    markUtxoAsConfirmed(txId: string, vout: number, confirmations: number): Promise<void>;
+    getTotalBalance(address: string): Promise<number>;
+    deleteUtxos(address: string): Promise<void>;
+    reset(address: string): Promise<void>;
+}
+
+export interface BitcoinProvider {
     baseUrl?: string;
     getBlockchainInfo(): Promise<any>; // Optional: Define a type later
 
