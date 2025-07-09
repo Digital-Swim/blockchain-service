@@ -11,7 +11,7 @@ import {
 
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
 import { getNetwork } from '../../providers/utils/common.js';
-import { BitcoinAddressType, BitcoinProvider, BitcoinUtxo, UtxoManager } from '../../types/bitcoin.js';
+import { BitcoinAddressType, BitcoinProvider, BitcoinTransactionStatus, BitcoinUtxo, UtxoManager } from '../../types/bitcoin.js';
 import { LocalUtxoManager } from '../../providers/bitcoin/utils/utxo-manager.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
@@ -167,17 +167,17 @@ export class BitcoinAddress {
 
         const address = this.address!;
         const manager = this.utxoManager!;
+        const network = this.network;
 
         return {
             addUtxos: (utxos: BitcoinUtxo[]) => manager.addUtxos(utxos),
             getUnspentUtxos: (fromNetwork: boolean = false) => manager.getUnspentUtxos(address, fromNetwork),
             markUtxoAsSpent: (txId: string, vout: number, spentInTxid: string) =>
                 manager.markUtxoAsSpent(txId, vout, spentInTxid),
-            markUtxoAsConfirmed: (txId: string, vout: number, confirmations: number) =>
-                manager.markUtxoAsConfirmed(txId, vout, confirmations),
             getTotalBalance: () => manager.getTotalBalance(address),
-            deleteUtxosByAddress: () => manager.deleteUtxos(address),
+            deleteUtxos: () => manager.deleteUtxos(address),
             reset: () => manager.reset(address),
+            udpateUtxos: (txHex: string, status: BitcoinTransactionStatus) => manager.udpateUtxos(txHex, status, network)
         };
     }
 

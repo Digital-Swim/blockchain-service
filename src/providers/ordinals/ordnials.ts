@@ -7,7 +7,7 @@ import { Taptree } from 'bitcoinjs-lib/src/types.js';
 import { NetworkType } from '../../types/common.js';
 import { CommitTrasanctionParams, Inscription, RevelaTransactionParams } from '../../types/ordinals.js';
 import { BitcoinRpcProvider } from '../bitcoin/rpc/bitcoin-rpc.js';
-import { BitcoinTransaction } from '../bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinTransactionManager } from '../bitcoin/utils/bitcoin-transaction.js';
 import { BitcoinUtxo } from '../../types/bitcoin.js';
 import { getNetwork } from '../utils/common.js';
 
@@ -65,7 +65,7 @@ export class OrdinalProvider {
         console.log(utxos.length);
 
         // Sending value to this address and locking the script 
-        const { fee, hex } = await BitcoinTransaction.create(
+        const { fee, hex } = await BitcoinTransactionManager.create(
             {
                 from,
                 toAddress: address!,

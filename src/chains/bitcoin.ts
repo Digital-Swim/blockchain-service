@@ -1,5 +1,5 @@
 import { FallbackBitcoinProvider } from "../providers/bitcoin/fallback-provider.js";
-import { BitcoinTransaction } from "../providers/bitcoin/utils/bitcoin-transaction.js";
+import { BitcoinTransactionManager } from "../providers/bitcoin/utils/bitcoin-transaction.js";
 import { LocalUtxoManager } from "../providers/bitcoin/utils/utxo-manager.js";
 import { BitcoinParams, BitcoinTransactionResult, BitcoinUtxo } from "../types/bitcoin.js";
 import { NetworkType } from "../types/common.js";
@@ -24,7 +24,7 @@ export class Bitcoin {
         // Get Utxos 
         const utxos = await from.getUtxoManager().getUnspentUtxos();
 
-        const tx: BitcoinTransactionResult = await BitcoinTransaction.create({
+        const tx: BitcoinTransactionResult = await BitcoinTransactionManager.create({
             amountSats,
             from,
             toAddress: to,

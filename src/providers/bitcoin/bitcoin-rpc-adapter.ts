@@ -59,8 +59,9 @@ export class BitcoinRpcAdapter implements BitcoinProvider {
         throw new Error("Not implemented")
     }
 
-    async getAddressUtxos(address: string): Promise<BitcoinUtxo[]> {
-        return this.rpc.listUnspentAddress(this.walletName, address)
+    async getAddressUtxos(address: string, includePending: boolean = false): Promise<BitcoinUtxo[]> {
+        const rawUtxos = await this.rpc.listUnspentAddress(this.walletName, address);
+        return rawUtxos.filter((utxo: BitcoinUtxo) => includePending || utxo.status);
     }
 
     async getMempoolInfo(): Promise<BitcoinMempoolInfo> {

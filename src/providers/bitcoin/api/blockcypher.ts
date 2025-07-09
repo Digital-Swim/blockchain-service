@@ -1,18 +1,18 @@
 import axios from 'axios';
-import { NetworkType } from '../../../types/common.js';
+import { appConfig } from '../../../config.js';
 import {
-    BitcoinBlock,
-    BitcoinTransaction,
-    BitcoinUtxo,
-    BitcoinMempoolInfo,
     BitcoinAddressInfo,
+    BitcoinBlock,
     BitcoinFeeEstimates,
-    BitcoinTxStatus,
+    BitcoinMempoolInfo,
+    BitcoinProvider,
+    BitcoinTransaction,
     BitcoinTxInput,
     BitcoinTxOutput,
-    BitcoinProvider,
+    BitcoinTxStatus,
+    BitcoinUtxo,
 } from '../../../types/bitcoin.js';
-import { appConfig } from '../../../config.js';
+import { NetworkType } from '../../../types/common.js';
 
 export class BlockcypherApiProvider implements BitcoinProvider {
     baseUrl?: string;
@@ -21,6 +21,7 @@ export class BlockcypherApiProvider implements BitcoinProvider {
         this.baseUrl = network === 'mainnet'
             ? appConfig.blockcypher.mainnet
             : appConfig.blockcypher.testnet;
+        console.log(this.baseUrl)
     }
 
     async getLatestBlockHash(): Promise<string> {
@@ -41,19 +42,29 @@ export class BlockcypherApiProvider implements BitcoinProvider {
 
     async broadcastTransaction(rawTxHex: string): Promise<string> {
         const res = await axios.post(`${this.baseUrl}/txs/push`, { tx: rawTxHex });
-        console.log(res.data)
         return res.data.tx.hash;
     }
 
-    async getAddressUtxos(address: string): Promise<BitcoinUtxo[]> {
+    async getAddressUtxos(address: string, includePending: boolean = false): Promise<BitcoinUtxo[]> {
+
         const res = await axios.get(`${this.baseUrl}/addrs/${address}?unspentOnly=true`);
-        return (res.data.txrefs || []).map((utxo: any): BitcoinUtxo => ({
-            txId: utxo.tx_hash,
-            vout: utxo.tx_output_n,
-            value: utxo.value,
-            confirmations: utxo.confirmations,
-            scriptPubKey: utxo.script,
-        }));
+
+        const confirmed = res.data.txrefs || [];
+        const unconfirmed = res.data.unconfirmed_txrefs || [];
+        const allUtxos = [...confirmed, ...unconfirmed];
+
+        return allUtxos
+            .filter((utxo: any) => includePending || utxo.confirmations > 0)
+            .map((utxo: any): BitcoinUtxo => ({
+                txId: utxo.tx_hash,
+                vout: utxo.tx_output_n,
+                value: utxo.value,
+                scriptPubKey: utxo.script || '',
+                status: utxo.confirmations > 0 ? 'unspent' : 'pending',
+                address: res.data.address,
+                confirmations: utxo.confirmations
+            } as BitcoinUtxo));
+
     }
 
     async getBlockchainInfo(): Promise<any> {

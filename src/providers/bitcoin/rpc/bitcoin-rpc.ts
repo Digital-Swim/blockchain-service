@@ -5,11 +5,13 @@ export class BitcoinRpcProvider extends Rpc {
 
     private normalizeUTXO(raw: any): BitcoinUtxo {
         return {
-            txId: raw.txId ?? raw.txid,           // accept either `txId` or `txid`
+            txId: raw.txId ?? raw.txid,
             vout: raw.vout,
-            value: Math.round((raw.value ?? raw.amount) * 1e8), // accept either `value` or `amount`
-            address: raw.address
-        };
+            value: Math.round((raw.value ?? raw.amount) * 1e8), // Satoshis
+            address: raw.address,
+            scriptPubKey: raw.scriptPubKey,
+            status: raw.confirmations > 0 ? 'unspent' : 'pending',
+        } as BitcoinUtxo;
     }
 
     async getBlockByHash(blockHash: string): Promise<any> {

@@ -1,16 +1,16 @@
 import axios from 'axios';
 import { appConfig } from '../../../config.js';
 import {
-    BitcoinBlock,
-    BitcoinTransaction,
     BitcoinAddressInfo,
-    BitcoinUtxo,
+    BitcoinBlock,
     BitcoinFeeEstimates,
     BitcoinMempoolInfo,
-    BitcoinTxStatus,
-    BitcoinTxOutput,
+    BitcoinProvider,
+    BitcoinTransaction,
     BitcoinTxInput,
-    BitcoinProvider
+    BitcoinTxOutput,
+    BitcoinTxStatus,
+    BitcoinUtxo
 } from '../../../types/bitcoin.js';
 
 import { NetworkType } from '../../../types/common.js';
@@ -36,23 +36,21 @@ export class BlockstreamApiProvider implements BitcoinProvider {
         return res.data;
     }
 
-    async getAddressUtxos(address: string, confirmedOnly = false): Promise<BitcoinUtxo[]> {
+    async getAddressUtxos(address: string, includePending: boolean = false): Promise<BitcoinUtxo[]> {
+
         const res = await axios.get(`${this.baseUrl}/address/${address}/utxo`);
 
         return res.data
-            .filter((utxo: any) => !confirmedOnly || utxo.status.confirmed)
+            .filter((utxo: any) => includePending || utxo.status.confirmed)
             .map((utxo: any) => ({
-                txid: utxo.txid,
+                txId: utxo.txid,
                 vout: utxo.vout,
                 value: utxo.value,
                 scriptPubKey: '',
-                status: {
-                    confirmed: utxo.status.confirmed,
-                    blockHeight: utxo.status.block_height,
-                    blockHash: utxo.status.block_hash,
-                    blockTime: utxo.status.block_time
-                } as BitcoinTxStatus
-            }));
+                status: utxo.status.confirmed ? 'unspent' : 'pending',
+                address
+            }) as BitcoinUtxo);
+
     }
 
     async getBlockchainInfo(): Promise<any> {
@@ -71,7 +69,7 @@ export class BlockstreamApiProvider implements BitcoinProvider {
             time: new Date(block.timestamp * 1000).toISOString(),
             txCount: block.tx_count,
             prevHash: block.previousblockhash,
-        }));
+        } as BitcoinBlock));
     }
 
     async getBlockByHash(blockHash: string): Promise<BitcoinBlock> {

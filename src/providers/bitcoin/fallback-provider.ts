@@ -97,8 +97,8 @@ export class FallbackBitcoinProvider implements BitcoinProvider {
         return this.tryProviders('getAddressFull', address, limit, before);
     }
 
-    getAddressUtxos(address: string): Promise<BitcoinUtxo[]> {
-        return this.tryProviders('getAddressUtxos', address);
+    getAddressUtxos(address: string, includePending?: boolean): Promise<BitcoinUtxo[]> {
+        return this.tryProviders('getAddressUtxos', address, includePending);
     }
 
     getMempoolInfo?(): Promise<BitcoinMempoolInfo> {

@@ -11,7 +11,7 @@ export const appConfig: AppConfig = {
             username: process.env.BITCOIN_USERNAME ?? 'ranjit',
             password: process.env.BITCOIN_PASSWORD ?? 'ranjit',
             url: process.env.BITCOIN_HOST ?? 'http://localhost:18443',
-            walletName:"test-rpc"
+            walletName: "test-rpc"
         }
     ],
     blockcypher: {
@@ -34,5 +34,5 @@ export const appConfig: AppConfig = {
     coingecko: {
         base: process.env.COINGECKO_API_URL || 'https://api.coingecko.com/api/v3'
     },
-    selectedProviders: ['bitcoinNodes']
+    selectedProviders: ['bitcoinNodes'] //bitcoinNodes, 
 }

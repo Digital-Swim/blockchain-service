@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { describe, it, before } from 'mocha';
 import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
 import { BitcoinRpcAdapter } from '../src/providers/bitcoin/bitcoin-rpc-adapter.js';
-import { BitcoinTransaction } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinTransactionManager } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
 
 const walletName = "test-rpc";
 

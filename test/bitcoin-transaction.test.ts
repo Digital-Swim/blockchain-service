@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
 import { NetworkType } from '../src/types/common.js';
 import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
-import { BitcoinTransaction } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinTransactionManager } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
 import { BitcoinAddressType, BitcoinTransactionParams } from '../src/types/bitcoin.js';
 import { getAddressType } from '../src/providers/utils/common.js';
 
@@ -23,6 +23,7 @@ describe('BitcoinTransaction - regtest with all address types', function () {
 
     for (const type of addressTypes) {
         describe(`Transaction using address type: ${type}`, () => {
+            
             const addressObject = new BitcoinAddress({
                 wif: 'cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8',
                 network,
@@ -70,7 +71,7 @@ describe('BitcoinTransaction - regtest with all address types', function () {
                 const utxos = await rpc.listUnspentAddress(walletName, fromAddress);
                 expect(utxos).to.be.an('array').that.is.not.empty;
 
-                const { hex, fee } = await BitcoinTransaction.create({
+                const { hex, fee } = await BitcoinTransactionManager.create({
                     amountSats: 100000,
                     toAddress: toAddress,
                     from: addressObject,

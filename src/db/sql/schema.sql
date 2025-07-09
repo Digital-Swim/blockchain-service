@@ -3,10 +3,12 @@ CREATE TABLE utxos (
     txid VARCHAR(100) NOT NULL,
     vout INT NOT NULL,
     address VARCHAR(100) NOT NULL,
-    amount BIGINT NOT NULL, -- in satoshis
+    amount BIGINT NOT NULL,
+    -- in satoshis
     script_pub_key TEXT NOT NULL,
-    status ENUM('unspent', 'spent') NOT NULL,
+    status ENUM('unspent', 'spent', 'pending') NOT NULL,
     spent_in_txid VARCHAR(100),
+    confirmations INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY utxo_unique (txid, vout),

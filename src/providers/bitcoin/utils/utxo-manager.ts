@@ -1,8 +1,10 @@
 import { RowDataPacket } from 'mysql2/promise';
-import { BitcoinProvider, BitcoinUtxo, UtxoManager } from '../../../types/bitcoin.js';
+import { BitcoinProvider, BitcoinTransaction, BitcoinTransactionStatus, BitcoinUtxo, BitcoinUtxoStatus, UtxoManager } from '../../../types/bitcoin.js';
 import { db } from '../../../db/database.js';
 import { FallbackBitcoinProvider } from '../fallback-provider.js';
-
+import { decodeRawTransaction, getNetwork } from '../../utils/common.js';
+import * as bitcoin from "bitcoinjs-lib";
+import { NetworkType } from '../../../types/common.js';
 export class LocalUtxoManager implements UtxoManager {
 
     private bitcoinProvider?: FallbackBitcoinProvider | BitcoinProvider;
@@ -17,24 +19,19 @@ export class LocalUtxoManager implements UtxoManager {
         if (!utxos.length) return;
 
         const sql = `
-            INSERT INTO utxos (txid, vout, amount, confirmations, script_pub_key, status, address, spent_in_txid)
-            VALUES ${utxos.map(() => `(?, ?, ?, ?, ?, ?, ?, ?)`).join(', ')}
-            ON DUPLICATE KEY UPDATE
-                confirmations = VALUES(confirmations),
-                status = VALUES(status),
-                spent_in_txid = VALUES(spent_in_txid),
-                updated_at = CURRENT_TIMESTAMP
-        `;
+        INSERT INTO utxos (txid, vout, amount, confirmations, script_pub_key, status, address, spent_in_txid)
+        VALUES ${utxos.map(() => `(?, ?, ?, ?, ?, ?, ?, ?)`).join(', ')}
+    `;
 
         const values = utxos.flatMap(utxo => [
             utxo.txId,
             utxo.vout,
             utxo.value,
-            utxo.confirmations ?? 0,
+            utxo.confirmations,
             utxo.scriptPubKey ?? '',
-            utxo.status ?? 'pending',
-            utxo.address ?? '',
-            utxo.spentInTxId ?? null,
+            utxo.status,
+            utxo.address,
+            utxo.spentInTxId,
         ]);
 
         await db.query(sql, values);
@@ -61,20 +58,10 @@ export class LocalUtxoManager implements UtxoManager {
     async markUtxoAsSpent(txId: string, vout: number, spentInTxid: string): Promise<void> {
         const sql = `
             UPDATE utxos
-            SET status = 'spent', spent_in_txid = ?, updated_at = CURRENT_TIMESTAMP
+            SET status = 'spent', spent_in_txid = ?
             WHERE txid = ? AND vout = ? AND status != 'spent'
         `;
         await db.query(sql, [spentInTxid, txId, vout]);
-    }
-
-    // Mark a UTXO as confirmed and update confirmations count
-    async markUtxoAsConfirmed(txId: string, vout: number, confirmations: number): Promise<void> {
-        const sql = `
-            UPDATE utxos
-            SET confirmations = ?, status = 'unspent', updated_at = CURRENT_TIMESTAMP
-            WHERE txid = ? AND vout = ? AND status != 'spent'
-        `;
-        await db.query(sql, [confirmations, txId, vout]);
     }
 
     // Get total balance of unspent UTXOs for an address
@@ -89,22 +76,144 @@ export class LocalUtxoManager implements UtxoManager {
     }
 
     async deleteUtxos(address: string): Promise<void> {
+        console.warn("deleting utxo for address ", address)
         const sql = `DELETE FROM utxos WHERE address = ?`;
         await db.query(sql, [address!]);
     }
 
-
     async reset(address: string): Promise<BitcoinUtxo[]> {
-
         if (!this.bitcoinProvider) throw new Error("bitcoin provider not set for address class object");
-
-        const utxos = await this.bitcoinProvider?.getAddressUtxos(address!)
+        const utxos = await this.bitcoinProvider?.getAddressUtxos(address!, true)
         await this.deleteUtxos(address!)
-
-        if (utxos?.length)
-            this.addUtxos(utxos!);
-
-        return utxos;
+        if (utxos?.length) {
+            await this.addUtxos(utxos!);
+        }
+        return utxos.filter(utxo => utxo.status === "unspent");
     }
+
+    async updateUtxos(utxos: BitcoinUtxo[]): Promise<void> {
+        if (!utxos.length) return;
+
+        const updates = await Promise.all(utxos.map(utxo => {
+            const sql = `
+                UPDATE utxos
+                SET confirmations = ?, status = ?, spent_in_txid = ?
+                WHERE txid = ? AND vout = ?
+            `;
+            const values = [
+                utxo.confirmations,
+                utxo.status,
+                utxo.spentInTxId,
+                utxo.txId,
+                utxo.vout
+            ];
+            return db.query(sql, values);
+        }));
+    }
+
+    async udpateUtxos(txHex: string, status: BitcoinTransactionStatus, network: bitcoin.Network | NetworkType) {
+        const tx = decodeRawTransaction(txHex, network);
+        console.log(tx)
+        const connection = await db.getConnection();
+        let newUtxos: any = [];
+        try {
+            await connection.beginTransaction();
+
+            if (status === "failed") {
+                const utxoToDelete = tx.vout.map((o, index) => ({
+                    txId: tx.txid,
+                    vout: o.n
+                }));
+
+                if (utxoToDelete.length > 0) {
+                    const placeholders = utxoToDelete.map(() => `(?, ?)`).join(', ');
+                    const values = utxoToDelete.flatMap(u => [u.txId, u.vout]);
+                    const sql = `DELETE FROM utxos WHERE (txid, vout) IN (${placeholders})`;
+                    await connection.query(sql, values);
+                }
+            }
+            else if (status === "pending") {
+
+                newUtxos = tx.vout.map((output, index) => {
+                    return {
+                        txId: tx.txid,
+                        vout: output.n,
+                        value: output.value,
+                        address: output.addresses?.join(","),
+                        status: "pending",
+                        confirmations: status === "pending" ? 0 : 1,
+                        scriptPubKey: output.scriptPubKey,
+                        spentInTxId: tx.txid
+                    } as BitcoinUtxo;
+                });
+
+
+                const sql = `
+                INSERT INTO utxos (txid, vout, amount, confirmations, script_pub_key, status, address, spent_in_txid)
+                VALUES ${newUtxos.map(() => `(?, ?, ?, ?, ?, ?, ?, ?)`).join(', ')}
+            `;
+
+                const values = newUtxos.flatMap((utxo: BitcoinUtxo) => [
+                    utxo.txId,
+                    utxo.vout,
+                    utxo.value,
+                    utxo.confirmations,
+                    utxo.scriptPubKey ?? '',
+                    utxo.status,
+                    utxo.address,
+                    utxo.spentInTxId,
+                ]);
+
+                await db.query(sql, values);
+
+            }
+            else {
+                newUtxos = tx.vout.map((output, index) => {
+                    return {
+                        txId: tx.txid,
+                        vout: output.n,
+                        status: "unspent",
+                        confirmations: 1
+                    } as BitcoinUtxo;
+                });
+
+            }
+
+            const spentUtxos = tx.vin.map((input) => ({
+                txId: input.txid,
+                vout: input.vout,
+                status: status === "failed" ? "unspent" : "spent",
+                spentInTxId: tx.txid,
+            }));
+
+            const allUtxos = [...spentUtxos, ...newUtxos];
+
+            for (const utxo of allUtxos) {
+
+                const updateSql = `
+                    UPDATE utxos
+                    SET  confirmations = IFNULL(?,confirmations), status = ?, spent_in_txid = IFNULL(?, spent_in_txid)
+                    WHERE txid = ? AND vout = ?
+                `;
+                const values = [
+                    utxo.confirmations,
+                    utxo.status,
+                    utxo.spentInTxId,
+                    utxo.txId,
+                    utxo.vout
+                ];
+                await connection.query(updateSql, values);
+            }
+
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+
 }
 

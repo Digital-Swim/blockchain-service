@@ -1,18 +1,21 @@
 import { Target } from "coinselect";
 import { BitcoinAddress } from "../wallets/bitcoin/address";
-
+import { NetworkType } from "./common";
+import * as bitcoin from "bitcoinjs-lib";
 export type UtxoSelectStrategy = 'default' | 'accumulative' | 'blackjack' | 'break' | 'split';
 export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2tr' | 'p2wsh';
 export type BitcoinCoreAddressType = 'legacy' | 'p2sh-segwit' | 'bech32' | 'bech32m';
+export type BitcoinUtxoStatus = 'spent' | 'unspent' | 'pending';
+export type BitcoinTransactionStatus = 'failed' | 'confirmed' | 'pending';
 
 export interface UtxoManager {
     addUtxos(utxos: BitcoinUtxo[]): Promise<void>;
-    getUnspentUtxos(address: string, fromNetwork: boolean): Promise<BitcoinUtxo[]>;
+    getUnspentUtxos(address: string, fromNetwork?: boolean): Promise<BitcoinUtxo[]>;
     markUtxoAsSpent(txId: string, vout: number, spentInTxid: string): Promise<void>;
-    markUtxoAsConfirmed(txId: string, vout: number, confirmations: number): Promise<void>;
     getTotalBalance(address: string): Promise<number>;
     deleteUtxos(address: string): Promise<void>;
     reset(address: string): Promise<BitcoinUtxo[]>;
+    udpateUtxos(txHex: string, status: BitcoinTransactionStatus, network: NetworkType | bitcoin.Network): Promise<void>;
 }
 
 export interface BitcoinProvider {
@@ -32,7 +35,7 @@ export interface BitcoinProvider {
 
     getAddressInfo(address: string): Promise<BitcoinAddressInfo>;
     getAddressFull?(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]>;
-    getAddressUtxos(address: string): Promise<BitcoinUtxo[]>;
+    getAddressUtxos(address: string, includePending?: boolean): Promise<BitcoinUtxo[]>;
 
     getBalance(address: string): Promise<number>;
     getMempoolInfo?(): Promise<BitcoinMempoolInfo>;
@@ -67,6 +70,7 @@ export interface BitcoinTxInput {
     vout: number;
     addresses?: string[];
     value: number;
+    scriptSig?: string;
 }
 
 export interface BitcoinTxOutput {
@@ -100,7 +104,7 @@ export interface BitcoinUtxo {
     value: number;
     confirmations?: number;
     scriptPubKey?: string;
-    status?: BitcoinTxStatus
+    status?: BitcoinUtxoStatus
     address?: string;
     spentInTxId?: string;
 }

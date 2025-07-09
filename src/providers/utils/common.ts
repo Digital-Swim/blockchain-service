@@ -1,6 +1,6 @@
 import * as bitcoin from "bitcoinjs-lib";
 import { NetworkType } from "../../types/common.js";
-import { BitcoinAddressType } from "../../types/bitcoin.js";
+import { BitcoinAddressType, BitcoinTransaction } from "../../types/bitcoin.js";
 import * as bitcoinMessage from 'bitcoinjs-message';
 
 export const getNetwork = (network: NetworkType) => {
@@ -36,3 +36,62 @@ export const verifyMessage = (
     const signature = Buffer.from(signatureBase64, 'base64');
     return bitcoinMessage.verify(message, address, signature, network.messagePrefix);
 }
+
+export const decodeRawTransaction1 = (rawTxHex: string): BitcoinTransaction => {
+    const tx = bitcoin.Transaction.fromHex(rawTxHex);
+
+    return {
+        txid: tx.getId(),
+        size: tx.byteLength(),
+        weight: tx.weight(),
+        fee: 0,
+        vin: tx.ins.map((input) => ({
+            txid: Buffer.from(input.hash).reverse().toString('hex'),
+            vout: input.index,
+            scriptSig: input.script.toString('hex'),
+            value: 0
+        })),
+        vout: tx.outs.map((output, index) => ({
+            n: index,
+            value: output.value,
+            scriptPubKey: output.script.toString('hex')
+        }))
+    };
+};
+
+
+
+export const decodeRawTransaction = (rawTxHex: string, network:bitcoin.Network | NetworkType = bitcoin.networks.bitcoin): BitcoinTransaction => {
+    
+    const bitcoinNetwork = (typeof  network === "string") ? getNetwork(network) :  network
+    
+    const tx = bitcoin.Transaction.fromHex(rawTxHex);
+
+    return {
+        txid: tx.getId(),
+        size: tx.byteLength(),
+        weight: tx.weight(),
+        fee: 0,
+        vin: tx.ins.map((input) => ({
+            txid: Buffer.from(input.hash).reverse().toString('hex'),
+            vout: input.index,
+            scriptSig: input.script.toString('hex'),
+            value: 0,
+        })),
+        vout: tx.outs.map((output, index) => {
+            let address = '';
+            try {
+                address = bitcoin.address.fromOutputScript(output.script, bitcoinNetwork);
+            } catch (e) {
+                // Could be OP_RETURN or unknown script type
+                address = '';
+            }
+            return {
+                n: index,
+                value: output.value,
+                scriptPubKey: output.script.toString('hex'),
+                addresses: [address]
+            };
+        }),
+    };
+};

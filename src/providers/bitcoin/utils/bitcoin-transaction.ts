@@ -16,7 +16,7 @@ const ECPair: ECPairAPI = ECPairFactory(ecc);
 /**
  * Bitcoin provider for creating and signing Bitcoin transactions
  */
-export class BitcoinTransaction {
+export class BitcoinTransactionManager {
 
     static async create(params: BitcoinTransactionParams, network: NetworkType | bitcoin.Network): Promise<BitcoinTransactionResult> {
 
@@ -37,10 +37,10 @@ export class BitcoinTransaction {
         const type = getAddressType(from.address!, network);
 
         for (const input of inputs) {
-            BitcoinTransaction.addInputByType(psbt, input, from, type, btcNetwork)
+            BitcoinTransactionManager.addInputByType(psbt, input, from, type, btcNetwork)
         }
 
-        var finalOutputs: Target[] = BitcoinTransaction.addOutputs(psbt, outputs, fromAddress);
+        var finalOutputs: Target[] = BitcoinTransactionManager.addOutputs(psbt, outputs, fromAddress);
 
         psbt.signAllInputs(from.getSignableKey(type));
         psbt.finalizeAllInputs();
