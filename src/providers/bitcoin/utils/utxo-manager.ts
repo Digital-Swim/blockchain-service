@@ -1,11 +1,11 @@
-import { RowDataPacket } from 'mysql2/promise';
-import { BitcoinProvider, BitcoinTransaction, BitcoinTransactionStatus, BitcoinUtxo, BitcoinUtxoStatus, UtxoManager } from '../../../types/bitcoin.js';
-import { db } from '../../../db/database.js';
-import { FallbackBitcoinProvider } from '../fallback-provider.js';
-import { decodeRawTransaction, getNetwork } from '../../utils/common.js';
 import * as bitcoin from "bitcoinjs-lib";
+import { RowDataPacket } from 'mysql2/promise';
+import { db } from '../../../db/database.js';
+import { BitcoinProvider, BitcoinTransactionStatus, BitcoinUtxo, UtxoManager } from '../../../types/bitcoin.js';
 import { NetworkType } from '../../../types/common.js';
-export class LocalUtxoManager implements UtxoManager {
+import { decodeRawTransaction } from '../../../utils/common.js';
+import { FallbackBitcoinProvider } from '../fallback-provider.js';
+export class BitcoinUtxoManager implements UtxoManager {
 
     private bitcoinProvider?: FallbackBitcoinProvider | BitcoinProvider;
 

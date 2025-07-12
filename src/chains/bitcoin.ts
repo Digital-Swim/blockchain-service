@@ -1,30 +1,39 @@
+import { Stack } from "bitcoinjs-lib";
 import { FallbackBitcoinProvider } from "../providers/bitcoin/fallback-provider.js";
 import { BitcoinTransactionManager } from "../providers/bitcoin/utils/bitcoin-transaction.js";
-import { LocalUtxoManager } from "../providers/bitcoin/utils/utxo-manager.js";
+import { BitcoinUtxoManager } from "../providers/bitcoin/utils/utxo-manager.js";
 import { BitcoinParams, BitcoinTransactionResult, BitcoinUtxo } from "../types/bitcoin.js";
 import { NetworkType } from "../types/common.js";
 import { BitcoinAddress } from "../wallets/bitcoin/address.js";
+import * as bitcoin from "bitcoinjs-lib";
 
 export class Bitcoin {
 
-    private network: NetworkType
-    private fallBackBitcoinProvider: FallbackBitcoinProvider;
+    network: NetworkType
+    fallBackBitcoinProvider: FallbackBitcoinProvider;
 
     constructor(network: NetworkType) {
         this.network = network;
         this.fallBackBitcoinProvider = new FallbackBitcoinProvider(network);
     }
 
-    async send(params: BitcoinParams): Promise<any> {
+    compile(data: Buffer | Stack) {
+        return bitcoin.script.compile(data);
+    }
 
-        const { amountSats, from: fromAddress, key: { wif, privateKey }, to, feeRate, fixedFee, utxoSelectStrategy } = params
+    async create(params: BitcoinParams): Promise<BitcoinTransactionResult> {
 
-        const from = new BitcoinAddress({ address: fromAddress, wif, privateKey, network: this.network }, new LocalUtxoManager(this.fallBackBitcoinProvider));
+        const { amountSats, from: fromAddress, key, to, feeRate, fixedFee, utxoSelectStrategy } = params
 
-        // Get Utxos 
+        if ((feeRate == null && fixedFee == null) || (feeRate === 0 && fixedFee === 0)) {
+            throw new Error("Either feeRate or fixedFee must be provided and greater than zero");
+        }
+
+        const from: BitcoinAddress = (fromAddress instanceof BitcoinAddress) ? fromAddress : new BitcoinAddress({ address: fromAddress, key, network: this.network }, new BitcoinUtxoManager(this.fallBackBitcoinProvider));
+
         const utxos = await from.getUtxoManager().getUnspentUtxos();
 
-        const tx: BitcoinTransactionResult = await BitcoinTransactionManager.create({
+        return BitcoinTransactionManager.create({
             amountSats,
             from,
             toAddress: to,
@@ -34,32 +43,29 @@ export class Bitcoin {
             utxoSelectStrategy
         }, this.network)
 
-        console.log(JSON.stringify(tx))
-
-        // Publish 
-        const txid = await this.fallBackBitcoinProvider.broadcastTransaction(tx.hex);
-
-        console.log(txid)
-
-
     }
 
+    async broadcast(hex: string): Promise<string> {
+        return this.fallBackBitcoinProvider.broadcastTransaction(hex);
+    }
 
 }
 
 
-let b = new Bitcoin("regtest")
+function test() {
+    let b = new Bitcoin("regtest")
+    b.create(
+        {
+            amountSats: 10000,
+            from: "mtbvtNMCuB3NCuQRvXjjheLT2iuRiuukjn",
+            key: {
+                wif: "cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8"
+            },
+            to: "bcrt1pp00dvm9ja0wnwckherxmwhxwlt7e8fts0str2nnhnrn7sldznk5spp2rxu",
+            feeRate: 1
+        }
+    ).then(res => { console.log("Done") }).catch(e => {
+        console.log(e.message)
+    })
+}
 
-b.send(
-    {
-        amountSats: 10000,
-        from: "mtbvtNMCuB3NCuQRvXjjheLT2iuRiuukjn",
-        key: {
-            wif: "cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8"
-        },
-        to: "bcrt1pp00dvm9ja0wnwckherxmwhxwlt7e8fts0str2nnhnrn7sldznk5spp2rxu",
-        feeRate: 1
-    }
-).then(res => { console.log("Done") }).catch(e => {
-    console.log(e.message)
-})

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getAddressType } from '../src/providers/utils/common.js';
+import { getAddressType } from '../src/utils/common.js';
 import { NetworkType } from '../src/types/common.js';
 import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
 

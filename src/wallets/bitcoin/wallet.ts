@@ -2,7 +2,7 @@ import * as bip32 from 'bip32';
 import * as bip39 from 'bip39';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
-import { getNetwork } from '../../providers/utils/common.js';
+import { getNetwork } from '../../utils/common.js';
 import { NetworkType } from '../../types/common.js';
 import { BitcoinAddress } from './address.js';
 
@@ -57,7 +57,7 @@ export class BitcoinWallet {
     getAddress(index: number, change: number = 0, accountIndex: number = 0): BitcoinAddress {
         const path = `m/84'/${this.cointtype}'/${accountIndex}'/${change}/${index}`;
         const child = this.root.derivePath(path);
-        return new BitcoinAddress({ wif: child.toWIF(), network: this.network });
+        return new BitcoinAddress({ key:{wif: child.toWIF()}, network: this.network });
     }
 
 }

@@ -48,10 +48,10 @@ export type BitcoinKey = {
 }
 
 export type BitcoinParams = {
-    from: string,
-    key: BitcoinKey,
+    from: string | BitcoinAddress,
     to: string;
     amountSats: number;
+    key?: BitcoinKey,
     fixedFee?: number;
     feeRate?: number;
     utxoSelectStrategy?: UtxoSelectStrategy;

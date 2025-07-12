@@ -5,11 +5,11 @@ import {
 } from 'bitcoinjs-lib/src/payments/bip341.js';
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
 import { NetworkType } from '../../types/common.js';
-import { CommitTrasanctionParams, Inscription, RevelaTransactionParams } from '../../types/ordinals.js';
+import { CommitTransactionParams, Inscription, RevelaTransactionParams } from '../../types/ordinals.js';
 import { BitcoinRpcProvider } from '../bitcoin/rpc/bitcoin-rpc.js';
 import { BitcoinTransactionManager } from '../bitcoin/utils/bitcoin-transaction.js';
 import { BitcoinUtxo } from '../../types/bitcoin.js';
-import { getNetwork } from '../utils/common.js';
+import { getNetwork } from '../../utils/common.js';
 
 
 
@@ -49,7 +49,7 @@ export class OrdinalProvider {
         ]);
     }
 
-    async commit(params: CommitTrasanctionParams) {
+    async commit(params: any) {
 
         console.log("creaeting commit tx")
 
@@ -87,7 +87,7 @@ export class OrdinalProvider {
         } as BitcoinUtxo;
     }
 
-    async reveal(params: RevelaTransactionParams) {
+    async reveal(params: any) {
 
         console.log("creaeting reveal tx")
 
@@ -116,6 +116,7 @@ export class OrdinalProvider {
             ],
         });
 
+        
         const fee = 1000;
         const sendAmount = commitUTXO.value - fee;
 
@@ -124,6 +125,7 @@ export class OrdinalProvider {
         psbt.finalizeInput(0);
 
         const tx = psbt.extractTransaction();
+        
         const hex = tx.toHex();
         console.log(hex);
 

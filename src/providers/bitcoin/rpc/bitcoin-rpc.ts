@@ -1,4 +1,4 @@
-import { Rpc } from "../../utils/rpc.js";
+import { Rpc } from "../../../utils/rpc.js";
 import { BitcoinCoreAddressType, BitcoinUtxo } from "../../../types/bitcoin.js";
 
 export class BitcoinRpcProvider extends Rpc {

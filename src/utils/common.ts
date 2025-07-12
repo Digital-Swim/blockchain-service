@@ -1,6 +1,6 @@
 import * as bitcoin from "bitcoinjs-lib";
-import { NetworkType } from "../../types/common.js";
-import { BitcoinAddressType, BitcoinTransaction } from "../../types/bitcoin.js";
+import { NetworkType } from "../types/common.js";
+import { BitcoinAddressType, BitcoinTransaction } from "../types/bitcoin.js";
 import * as bitcoinMessage from 'bitcoinjs-message';
 
 export const getNetwork = (network: NetworkType) => {
@@ -61,10 +61,10 @@ export const decodeRawTransaction1 = (rawTxHex: string): BitcoinTransaction => {
 
 
 
-export const decodeRawTransaction = (rawTxHex: string, network:bitcoin.Network | NetworkType = bitcoin.networks.bitcoin): BitcoinTransaction => {
-    
-    const bitcoinNetwork = (typeof  network === "string") ? getNetwork(network) :  network
-    
+export const decodeRawTransaction = (rawTxHex: string, network: bitcoin.Network | NetworkType = bitcoin.networks.bitcoin): BitcoinTransaction => {
+
+    const bitcoinNetwork = (typeof network === "string") ? getNetwork(network) : network
+
     const tx = bitcoin.Transaction.fromHex(rawTxHex);
 
     return {
@@ -95,3 +95,22 @@ export const decodeRawTransaction = (rawTxHex: string, network:bitcoin.Network |
         }),
     };
 };
+
+
+export const log = (message: string, type: "log" | "warn" | "error" = "log") => {
+    switch (type) {
+        case "error":
+            console.error(`[${new Date().toISOString()}] ${message}`);
+            break;
+        case "warn":
+            console.warn(`[${new Date().toISOString()}] ${message}`);
+            break;
+        default:
+            console.log(`[${new Date().toISOString()}] ${message}`);
+            break;
+    }
+}
+
+export const delay = (millsec: number): Promise<void> => {
+    return new Promise((resolve) => setTimeout(resolve, millsec))
+}

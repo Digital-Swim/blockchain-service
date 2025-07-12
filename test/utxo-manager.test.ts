@@ -1,8 +1,7 @@
 import { FallbackBitcoinProvider } from '../src/providers/bitcoin/fallback-provider.js';
 import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
 import { BitcoinTransactionManager } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
-import { LocalUtxoManager } from '../src/providers/bitcoin/utils/utxo-manager.js';
-import { decodeRawTransaction, getNetwork } from '../src/providers/utils/common.js';
+import { BitcoinUtxoManager } from '../src/providers/bitcoin/utils/utxo-manager.js';
 import { BitcoinTransactionParams } from '../src/types/bitcoin.js';
 import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
 
@@ -17,10 +16,10 @@ describe('LocalUtxoManager (regtest)', function () {
     const walletName = 'test-rpc';
     const network = "regtest"
     const bitcoinProvider = new FallbackBitcoinProvider(network)
-    const utxoManager = new LocalUtxoManager(bitcoinProvider);
+    const utxoManager = new BitcoinUtxoManager(bitcoinProvider);
 
     const addressObject = new BitcoinAddress({
-        wif: 'cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8',
+        key: { wif: 'cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8' },
         network,
     }, utxoManager);
 

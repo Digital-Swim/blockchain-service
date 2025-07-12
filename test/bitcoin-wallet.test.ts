@@ -3,7 +3,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { BitcoinWallet } from '../src/wallets/bitcoin/wallet.js';
 import { NetworkType } from '../src/types/common.js';
 import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
-import { verifyMessage } from '../src/providers/utils/common.js';
+import { verifyMessage } from '../src/utils/common.js';
 
 const supportedNetworks: NetworkType[] = ['mainnet', 'testnet', 'regtest'];
 
@@ -35,7 +35,7 @@ describe('BitcoinWallet across networks', () => {
 
             it('should restore wallet from WIF and match address', () => {
                 const wif = address.getPrivateKeyWIF();
-                const restored = new BitcoinAddress({ wif, network });
+                const restored = new BitcoinAddress({ key:{wif}, network });
                 expect(restored.getAddress('p2wpkh')).to.equal(address.getAddress('p2wpkh'));
             });
 

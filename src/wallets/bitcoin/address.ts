@@ -10,9 +10,8 @@ import {
 } from 'bitcoinjs-lib/src/psbt/bip371.js';
 
 import { Taptree } from 'bitcoinjs-lib/src/types.js';
-import { getNetwork } from '../../providers/utils/common.js';
-import { BitcoinAddressType, BitcoinProvider, BitcoinTransactionStatus, BitcoinUtxo, UtxoManager } from '../../types/bitcoin.js';
-import { LocalUtxoManager } from '../../providers/bitcoin/utils/utxo-manager.js';
+import { BitcoinAddressType, BitcoinKey, BitcoinTransactionStatus, BitcoinUtxo, UtxoManager } from '../../types/bitcoin.js';
+import { getNetwork } from '../../utils/common.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);
@@ -27,12 +26,11 @@ export class BitcoinAddress {
 
     constructor(options?: {
         address?: string;
-        wif?: string;
-        privateKey?: string | Buffer;
+        key?: BitcoinKey
         network?: NetworkType | bitcoin.Network;
     }, utxoManager?: UtxoManager) {
 
-        const { address, wif, privateKey, network = "mainnet" } = options || {};
+        const { address, key, network = "mainnet" } = options || {};
 
         this.address = address;
         this.utxoManager = utxoManager;
@@ -41,10 +39,10 @@ export class BitcoinAddress {
             ? getNetwork(network)
             : (network ?? bitcoin.networks.bitcoin);
 
-        if (wif) {
-            this.keyPair = ECPair.fromWIF(wif, this.network);
-        } else if (privateKey) {
-            const privKeyBuf = typeof privateKey === 'string' ? Buffer.from(privateKey, 'hex') : privateKey;
+        if (key?.wif) {
+            this.keyPair = ECPair.fromWIF(key.wif, this.network);
+        } else if (key?.privateKey) {
+            const privKeyBuf = typeof key.privateKey === 'string' ? Buffer.from(key.privateKey, 'hex') : key.privateKey;
             this.keyPair = ECPair.fromPrivateKey(privKeyBuf, { network: this.network });
         } else {
             this.keyPair = ECPair.makeRandom({ network: this.network });

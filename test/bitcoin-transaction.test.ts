@@ -4,7 +4,7 @@ import { NetworkType } from '../src/types/common.js';
 import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
 import { BitcoinTransactionManager } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
 import { BitcoinAddressType, BitcoinTransactionParams } from '../src/types/bitcoin.js';
-import { getAddressType } from '../src/providers/utils/common.js';
+import { getAddressType } from '../src/utils/common.js';
 
 const network: NetworkType = "regtest";
 
@@ -25,7 +25,7 @@ describe('BitcoinTransaction - regtest with all address types', function () {
         describe(`Transaction using address type: ${type}`, () => {
             
             const addressObject = new BitcoinAddress({
-                wif: 'cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8',
+                key:{wif: 'cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8'},
                 network,
             });
 

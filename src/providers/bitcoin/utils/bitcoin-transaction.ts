@@ -8,7 +8,7 @@ import { NetworkType } from '../../../types/common.js';
 import { UtxoSelector } from './utxo-selector.js';
 import { BitcoinAddressType, BitcoinTransactionParams, BitcoinTransactionResult } from '../../../types/bitcoin.js';
 import { BitcoinAddress } from '../../../wallets/bitcoin/address.js';
-import { getAddressType, getNetwork } from '../../utils/common.js';
+import { getAddressType, getNetwork } from '../../../utils/common.js';
 
 const BIP32: bip32.BIP32API = bip32.BIP32Factory(ecc);
 const ECPair: ECPairAPI = ECPairFactory(ecc);

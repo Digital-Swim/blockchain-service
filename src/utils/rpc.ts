@@ -1,6 +1,6 @@
 // Rpc.ts
 import axios, { AxiosInstance } from 'axios';
-import { RpcConfig } from '../../types/common';
+import { RpcConfig } from '../types/common';
 
 
 

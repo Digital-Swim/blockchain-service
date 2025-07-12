@@ -14,7 +14,7 @@ describe('BitcoinTransaction - regtest', function () {
     this.timeout(50000);
 
     const addressObject = new BitcoinAddress({
-        wif: "cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8",
+        key:{wif: "cNR3Ghixdw4QYfY4ZULKBF51kxVtD6EBCDTxBkHmunDTGCwnz8J8"},
         network
     });
 
