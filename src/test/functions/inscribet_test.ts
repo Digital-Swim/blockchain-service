@@ -1,27 +1,19 @@
-import * as assert from 'assert';
 import BIP32Factory, { BIP32Interface } from 'bip32';
-import * as bip39 from 'bip39';
 import * as ecc from 'tiny-secp256k1';
-import { describe, it } from 'mocha';
 //import { PsbtInput, TapLeaf, TapLeafScript } from 'bip174';
 import * as bitcoin from 'bitcoinjs-lib';
-import { Taptree } from 'bitcoinjs-lib/src/types';
+
 import {
-    LEAF_VERSION_TAPSCRIPT,
-    tapleafHash,
+    LEAF_VERSION_TAPSCRIPT
 } from 'bitcoinjs-lib/src/payments/bip341.js';
 
 import {
-    toXOnly,
-    tapTreeToList,
-    tapTreeFromList,
+    toXOnly
 } from 'bitcoinjs-lib/src/psbt/bip371.js';
-import { witnessStackToScriptWitness } from 'bitcoinjs-lib/src/psbt/psbtutils';
-import * as tools from 'uint8array-tools';
-import { sha256 } from '@noble/hashes/sha256';
+import { Taptree } from 'bitcoinjs-lib/src/types';
 import { randomBytes } from 'crypto';
-import * as readline from 'readline';
 import ECPairFactory, { ECPairAPI } from 'ecpair';
+import * as readline from 'readline';
 
 bitcoin.initEccLib(ecc);
 const bip32 = BIP32Factory(ecc);
@@ -501,7 +493,7 @@ async function transferTaprootUtxo() {
         }
 
         // For simplicity, send back to the same P2TR address (can replace here)
-        const { address: sendAddress , output} = bitcoin.payments.p2tr({ internalPubkey: pubkey, network })
+        const { address: sendAddress, output } = bitcoin.payments.p2tr({ internalPubkey: pubkey, network })
 
         const fee = 1000
         const sendAmount = utxo.value - fee

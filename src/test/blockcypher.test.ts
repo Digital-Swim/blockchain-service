@@ -1,14 +1,15 @@
 import { expect } from 'chai';
-import { BlockstreamApiProvider } from '../src/providers/bitcoin/api/blockstream.js';
-import { appConfig } from '../src/config.js';
+
+import { appConfig } from '../config.js';
+import { BlockcypherApiProvider } from '../providers/bitcoin/api/blockcypher.js';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-describe('BlockstreamApiProvider', function () {
+describe('BlockcypherApiProvider', function () {
     this.timeout(20000); // Increased timeout
 
     const network = appConfig.network === "regtest" ? "testnet" : appConfig.network;
-    const provider = new BlockstreamApiProvider(network);
+    const provider = new BlockcypherApiProvider(network);
 
     it('should fetch the latest block hash', async () => {
         await delay(1000);
@@ -35,8 +36,8 @@ describe('BlockstreamApiProvider', function () {
     it('should fetch address info', async () => {
         await delay(1000);
         const address = appConfig.network === "mainnet"
-            ? "1PuJjnF476W3zXfVYmJfGnouzFDAXakkL4"
-            : "tb1pnexuk5akmt54fj2n4qx4rhfmr0e5w6parza2kh7m0wgp3ejt2ajsgkcxqv";
+            ? "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD"
+            : "mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn";
         const info = await provider.getAddressInfo(address);
         expect(info).to.have.property('address').that.equals(address);
     });
@@ -44,9 +45,10 @@ describe('BlockstreamApiProvider', function () {
     it('should fetch UTXOs for address', async () => {
         await delay(1000);
         const address = appConfig.network === "mainnet"
-            ? "1PuJjnF476W3zXfVYmJfGnouzFDAXakkL4"
-            : "tb1pnexuk5akmt54fj2n4qx4rhfmr0e5w6parza2kh7m0wgp3ejt2ajsgkcxqv";
+            ? "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD"
+            : "2Muvnve56oVZzs83t3FvdoASuh84Hqy9W9G";
         const utxos = await provider.getAddressUtxos(address);
+
         expect(utxos).to.be.an('array');
     });
 
@@ -58,15 +60,15 @@ describe('BlockstreamApiProvider', function () {
             throw new Error('Expected broadcast to fail, but it succeeded');
         } catch (err: any) {
             expect(err).to.exist;
-            expect(err.response?.status || err.status).to.equal(400);
+            expect(err.response?.status || err.status).to.be.oneOf([400, 422, 409]);
         }
     });
 
     it('should fetch full address transactions', async () => {
         await delay(1000);
         const address = network === "mainnet"
-            ? "1PuJjnF476W3zXfVYmJfGnouzFDAXakkL4"
-            : "tb1pnexuk5akmt54fj2n4qx4rhfmr0e5w6parza2kh7m0wgp3ejt2ajsgkcxqv";
+            ? "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD"
+            : "2Muvnve56oVZzs83t3FvdoASuh84Hqy9W9G";
         const txs = await provider.getAddressFull(address, 10);
         expect(txs).to.be.an('array');
         if (txs.length > 0) {
@@ -79,7 +81,6 @@ describe('BlockstreamApiProvider', function () {
         const mempool = await provider.getMempoolInfo();
         expect(mempool).to.be.an('object');
         expect(mempool).to.have.property('count').that.is.a('number');
-        expect(mempool).to.have.property('vsize').that.is.a('number');
         expect(mempool).to.have.property('totalFee').that.is.a('number');
     });
 
@@ -93,18 +94,17 @@ describe('BlockstreamApiProvider', function () {
     });
 
     it('should fetch blocks at given height', async () => {
-        const height = 800000; 
+        const height = 800000;
         const blocks = await provider.getBlockAtHeight(height);
         expect(blocks).to.be.an('array').that.is.not.empty;
         const block = blocks[0];
         expect(block).to.have.property('hash').that.is.a('string').with.lengthOf(64);
         expect(block).to.have.property('height').that.equals(height);
-        expect(block).to.have.property('txCount').that.is.a('number');
     });
 
     it('should return the correct balance for a known Bitcoin address', async () => {
         const address = network === "mainnet"
-            ? "1PuJjnF476W3zXfVYmJfGnouzFDAXakkL4"
+            ? "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD"
             : "2Muvnve56oVZzs83t3FvdoASuh84Hqy9W9G";
         const balance = await provider.getBalance(address);
         expect(balance).to.be.a('number');

@@ -1,9 +1,9 @@
-import { FallbackBitcoinProvider } from '../src/providers/bitcoin/fallback-provider.js';
-import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
-import { BitcoinTransactionManager } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
-import { BitcoinUtxoManager } from '../src/providers/bitcoin/utils/utxo-manager.js';
-import { BitcoinTransactionParams } from '../src/types/bitcoin.js';
-import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
+import { FallbackBitcoinProvider } from '../providers/bitcoin/fallback-provider.js';
+import { BitcoinRpcProvider } from '../providers/bitcoin/rpc/bitcoin-rpc.js';
+import { BitcoinTransactionManager } from '../providers/bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinUtxoManager } from '../providers/bitcoin/utils/utxo-manager.js';
+import { BitcoinTransactionParams } from '../types/bitcoin.js';
+import { BitcoinAddress } from '../wallets/bitcoin/address.js';
 
 const rpc = new BitcoinRpcProvider({
     url: 'http://127.0.0.1:18443',

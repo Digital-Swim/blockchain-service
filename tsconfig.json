@@ -2,18 +2,19 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext", // enables ESM
-    "moduleResolution": "bundler", // resolves CJS+ESM packages like in Node.js
+    "moduleResolution": "node", // resolves CJS+ESM packages like in Node.js
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "outDir": "dist",
+    "rootDir": "src",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": [
     "src",
-    "test",
-    "src/types",
-    "coinselect.d.ts"
+    "src/types/coinselect.d.ts",
   ],
   "exclude": [
     "node_modules"

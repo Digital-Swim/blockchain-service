@@ -1,10 +1,10 @@
 import { expect } from 'chai';
-import { BitcoinAddress } from '../src/wallets/bitcoin/address.js';
-import { NetworkType } from '../src/types/common.js';
-import { BitcoinRpcProvider } from '../src/providers/bitcoin/rpc/bitcoin-rpc.js';
-import { BitcoinTransactionManager } from '../src/providers/bitcoin/utils/bitcoin-transaction.js';
-import { BitcoinAddressType, BitcoinTransactionParams } from '../src/types/bitcoin.js';
-import { getAddressType } from '../src/utils/common.js';
+import { BitcoinAddress } from '../wallets/bitcoin/address.js';
+import { NetworkType } from '../types/common.js';
+import { BitcoinRpcProvider } from '../providers/bitcoin/rpc/bitcoin-rpc.js';
+import { BitcoinTransactionManager } from '../providers/bitcoin/utils/bitcoin-transaction.js';
+import { BitcoinAddressType, BitcoinTransactionParams } from '../types/bitcoin.js';
+import { getAddressType } from '../utils/common.js';
 
 const network: NetworkType = "regtest";
 
