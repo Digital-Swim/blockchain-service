@@ -6,13 +6,14 @@
   "scripts": {
     "build": "tsc",
     "prepare": "cpx package.json dist/ && cpx README.md dist/",
-    "prepublishOnly": "npm run build && npm run prepare"
+    "publish": "npm run build && npm run prepare"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^5.2.2",
+    "@types/lodash.merge": "^4.6.9",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.15.29",
     "chai": "^5.2.0",
@@ -37,6 +38,7 @@
     "coinselect": "^3.1.13",
     "dotenv": "^16.5.0",
     "ecpair": "^3.0.0",
+    "lodash.merge": "^4.6.2",
     "mysql2": "^3.14.1",
     "ordinals": "^1.0.1",
     "tiny-secp256k1": "^2.2.3"

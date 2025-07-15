@@ -1,9 +1,27 @@
 import dotenv from 'dotenv'
+import fs from 'fs'
+import path from 'path'
 import { AppConfig, NetworkType } from './types/common.js'
+import { log } from './utils/common.js'
+import merge from 'lodash.merge'
 
 dotenv.config()
 
-export const appConfig: AppConfig = {
+const CONFIG_FILENAME = 'blockchain-service-config.json'
+
+let overrideConfig: AppConfig | null = null
+
+try {
+    const configPath = path.resolve(process.cwd(), CONFIG_FILENAME)
+    if (fs.existsSync(configPath)) {
+        const raw = fs.readFileSync(configPath, 'utf-8')
+        overrideConfig = JSON.parse(raw) as AppConfig
+    }
+} catch (err) {
+    log("config file not available, using default")
+}
+
+const defaultConfig: AppConfig = {
     network: (process.env.BITCOIN_NETWORK as NetworkType) || 'regtest',
     bitcoinjs: {},
     bitcoinNodes: [
@@ -34,5 +52,7 @@ export const appConfig: AppConfig = {
     coingecko: {
         base: process.env.COINGECKO_API_URL || 'https://api.coingecko.com/api/v3'
     },
-    selectedProviders: ['bitcoinNodes'] //bitcoinNodes, 
+    selectedProviders: ['bitcoinNodes']
 }
+
+export const appConfig: AppConfig = merge({}, defaultConfig, overrideConfig)
