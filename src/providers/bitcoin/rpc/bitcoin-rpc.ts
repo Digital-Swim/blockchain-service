@@ -1,7 +1,12 @@
 import { Rpc } from "../../../utils/rpc.js";
 import { BitcoinCoreAddressType, BitcoinUtxo } from "../../../types/bitcoin.js";
+import { RpcConfig } from "../../../types/common.js";
 
 export class BitcoinRpcProvider extends Rpc {
+
+    constructor(config: RpcConfig) {
+        super(config)
+    }
 
     private normalizeUTXO(raw: any): BitcoinUtxo {
         return {
