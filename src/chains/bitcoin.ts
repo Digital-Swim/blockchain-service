@@ -31,7 +31,7 @@ export class Bitcoin {
 
         const from: BitcoinAddress = (fromAddress instanceof BitcoinAddress) ? fromAddress : new BitcoinAddress({ address: fromAddress, key, network: this.network }, new BitcoinUtxoManager(this.fallBackBitcoinProvider));
 
-        const utxos = await from.getUtxoManager().getUnspentUtxos();
+        const utxos = await from.getUtxoManager().getUnspentUtxos(true);
 
         return BitcoinTransactionManager.create({
             amountSats,

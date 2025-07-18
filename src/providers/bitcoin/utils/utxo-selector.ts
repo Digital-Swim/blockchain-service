@@ -25,7 +25,7 @@ export class UtxoSelector {
      *
      * @param utxos - List of unspent transaction outputs.
      * @param targets - Desired outputs with target values excluding change output
-     * @param feeRate - Fee rate in satoshis per byte.
+     * @param feeRate - Fee rate in satoshis per byte, int number.
      * @returns Selected inputs, outputs, and estimated fee.
      */
     selectDefault(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
@@ -40,7 +40,7 @@ export class UtxoSelector {
      * @param utxos - List of unspent transaction outputs.
      * @param targets - Desired outputs with target values excluding change output
      * @param feeRate - Fee rate in satoshis per byte.
-     * @returns Selected inputs, outputs, and estimated fee.
+     * @returns Selected inputs, outputs, and estimated fee, an int number.
      */
     selectAccumulative(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
         return accumulative(utxos, targets, feeRate);
@@ -53,7 +53,7 @@ export class UtxoSelector {
      *
      * @param utxos - List of unspent transaction outputs.
      * @param targets - Desired outputs with target values excluding change output
-     * @param feeRate - Fee rate in satoshis per byte.
+     * @param feeRate - Fee rate in satoshis per byte, an int number.
      * @returns Selected inputs, outputs, and estimated fee.
      */
     selectBlackjack(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
@@ -67,7 +67,7 @@ export class UtxoSelector {
      *
      * @param utxos - List of unspent transaction outputs.
      * @param targets - Desired outputs with target values excluding change output
-     * @param feeRate - Fee rate in satoshis per byte.
+     * @param feeRate - Fee rate in satoshis per byte, an integer number.
      * @returns Selected inputs, outputs, and estimated fee.
      */
     selectBreak(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
@@ -81,7 +81,7 @@ export class UtxoSelector {
      *
      * @param utxos - List of unspent transaction outputs.
      * @param targets - Desired outputs with target values excluding change output
-     * @param feeRate - Fee rate in satoshis per byte.
+     * @param feeRate - Fee rate in satoshis per byte, an integer number .
      * @returns Selected inputs, outputs, and estimated fee.
      */
     selectSplit(utxos: BitcoinUtxo[], targets: Target[], feeRate: number): CoinSelectResult {
@@ -128,18 +128,31 @@ export class UtxoSelector {
         feeRate?: number,
         fixedFee?: number
     ): CoinSelectResult {
+        // Ensure integers
+        fixedFee = typeof fixedFee === 'number' ? Math.floor(fixedFee) : undefined;
+        feeRate = typeof feeRate === 'number' ? Math.floor(feeRate) : undefined;
 
-        if (!utxos || utxos.length === 0) {
+        // Basic validations
+        if (!Array.isArray(utxos) || utxos.length === 0) {
             throw new Error('No UTXOs provided for selection.');
         }
+
+        if (!Array.isArray(targets) || targets.length === 0) {
+            throw new Error('No targets provided for selection.');
+        }
+
+        // Selection logic
         if (fixedFee != null) {
             return this.selectWithFixedFee(utxos, targets, fixedFee);
-        } else if (feeRate != null) {
-            return this.selectWithFeeRate(utxos, targets, feeRate);
-        } else {
-            throw new Error('Either fixedFee or feeRate must be provided.');
         }
+
+        if (feeRate != null) {
+            return this.selectWithFeeRate(utxos, targets, feeRate);
+        }
+
+        throw new Error('Either fixedFee or feeRate must be provided.');
     }
+
 
 
     /**
