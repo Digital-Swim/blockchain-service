@@ -30,6 +30,7 @@ export interface BitcoinProvider {
     getLatestBlockHash(): Promise<string>;
 
     getTransaction(txid: string): Promise<BitcoinTransaction>;
+    getTransactionStatus(txid: string): Promise<BitcoinTransactionStatus>;
     getTransactionHex(txid: string): Promise<string>;
     broadcastTransaction(rawTxHex: string): Promise<string>;
 

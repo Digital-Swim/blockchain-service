@@ -7,6 +7,7 @@ import {
     BitcoinMempoolInfo,
     BitcoinProvider,
     BitcoinTransaction,
+    BitcoinTransactionStatus,
     BitcoinTxInput,
     BitcoinTxOutput,
     BitcoinTxStatus,
@@ -23,6 +24,7 @@ export class BlockcypherApiProvider implements BitcoinProvider {
             : appConfig.blockcypher.testnet;
         console.log(this.baseUrl)
     }
+   
 
     async getLatestBlockHash(): Promise<string> {
         const res = await axios.get(`${this.baseUrl}`);
@@ -135,6 +137,20 @@ export class BlockcypherApiProvider implements BitcoinProvider {
         };
     }
 
+    async getTransactionStatus(txid: string): Promise<BitcoinTransactionStatus> {
+        try {
+            const tx = await this.getTransaction(txid);
+
+            if (tx?.status?.confirmed) {
+                return 'confirmed';
+            } else {
+                return 'pending';
+            }
+        } catch {
+            return 'failed';
+        }
+    }
+    
     async getTransactionHex(txid: string): Promise<string> {
         const res = await axios.get(`${this.baseUrl}/txs/${txid}?includeHex=true`);
         return res.data.hex;

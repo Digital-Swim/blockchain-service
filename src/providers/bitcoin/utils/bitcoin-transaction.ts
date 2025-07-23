@@ -18,6 +18,16 @@ const ECPair: ECPairAPI = ECPairFactory(ecc);
  */
 export class BitcoinTransactionManager {
 
+
+    static estimate(params: Omit<BitcoinTransactionParams, "from">): number {
+        const { toAddress, amountSats, utxos, feeRate, fixedFee, utxoSelectStrategy } = params;
+        if (!utxos?.length) throw new Error('No UTXOs available');
+        const utxoSelector = new UtxoSelector(utxoSelectStrategy);
+        const { fee } = utxoSelector.select(utxos!, [{ address: toAddress, value: amountSats }], feeRate, fixedFee);
+        return fee
+
+    }
+
     static async create(params: BitcoinTransactionParams, network: NetworkType | bitcoin.Network): Promise<BitcoinTransactionResult> {
 
         const { from, toAddress, amountSats, utxos, feeRate, fixedFee, utxoSelectStrategy } = params;
@@ -31,6 +41,7 @@ export class BitcoinTransactionManager {
 
         const utxoSelector = new UtxoSelector(utxoSelectStrategy);
         const { inputs, outputs, fee } = utxoSelector.select(utxos!, [{ address: toAddress, value: amountSats }], feeRate, fixedFee);
+
         if (!inputs?.length || !outputs?.length) throw new Error('UTXO selection failed, please check if there are sufficient funds');
 
         const psbt = new bitcoin.Psbt({ network: btcNetwork });

@@ -45,6 +45,34 @@ export class Bitcoin {
 
     }
 
+    async estimate(params: Omit<BitcoinParams, "feeRate" | "fixedFee"> & { feeRates: number[] }): Promise<{ rate: number; fee: number; }[]> {
+
+        const { amountSats, from: fromAddress, key, to, feeRates, utxoSelectStrategy } = params
+
+        if ((feeRates == null) || (feeRates.length === 0)) {
+            throw new Error("Either feeRate or fixedFee must be provided and greater than zero");
+        }
+
+        const from: BitcoinAddress = (fromAddress instanceof BitcoinAddress) ? fromAddress : new BitcoinAddress({ address: fromAddress, key, network: this.network }, new BitcoinUtxoManager(this.fallBackBitcoinProvider));
+
+        const utxos = await from.getUtxoManager().getUnspentUtxos(true);
+
+        return feeRates.map((rate: number) => {
+            const fee = BitcoinTransactionManager.estimate({
+                amountSats,
+                toAddress: to,
+                utxos,
+                feeRate: rate,
+                fixedFee: undefined,
+                utxoSelectStrategy
+            })
+
+            return { rate, fee }
+        })
+
+
+    }
+
     async broadcast(hex: string): Promise<string> {
         return this.fallBackBitcoinProvider.broadcastTransaction(hex);
     }

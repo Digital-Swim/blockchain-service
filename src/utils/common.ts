@@ -1,7 +1,8 @@
 import * as bitcoin from "bitcoinjs-lib";
-import { NetworkType } from "../types/common.js";
-import { BitcoinAddressType, BitcoinTransaction } from "../types/bitcoin.js";
 import * as bitcoinMessage from 'bitcoinjs-message';
+import { BitcoinAddressType, BitcoinTransaction } from "../types/bitcoin.js";
+import { NetworkType } from "../types/common.js";
+
 
 export const getNetwork = (network: NetworkType) => {
     return network === 'mainnet' ? bitcoin.networks.bitcoin : network === 'testnet' ? bitcoin.networks.testnet : network === 'regtest' ? bitcoin.networks.regtest : (() => { throw new Error(`Unsupported network: ${network}`); })();
@@ -27,14 +28,37 @@ export const getAddressType = (address: string, networkType: NetworkType | bitco
     throw new Error('Unsupported or invalid Bitcoin address');
 }
 
+
 export const verifyMessage = (
     message: string,
     address: string,
     signatureBase64: string,
-    network: bitcoin.Network = bitcoin.networks.bitcoin
+    network: bitcoin.Network | NetworkType = bitcoin.networks.bitcoin
 ): boolean => {
-    const signature = Buffer.from(signatureBase64, 'base64');
-    return bitcoinMessage.verify(message, address, signature, network.messagePrefix);
+    try {
+        const signature = Buffer.from(signatureBase64, 'base64');
+
+        console.log(signature)
+        console.log(signature.length);
+        let resolvedNetwork: bitcoin.Network;
+        if (typeof network === 'string') {
+            if (network === 'mainnet') {
+                resolvedNetwork = bitcoin.networks.bitcoin;
+            } else if (network === 'testnet') {
+                resolvedNetwork = bitcoin.networks.testnet;
+            } else {
+                throw new Error(`Unsupported network: ${network}`);
+            }
+        } else {
+            resolvedNetwork = network;
+        }
+
+        return bitcoinMessage.verify(message, address, signature, resolvedNetwork.messagePrefix);
+    }
+    catch (e: any) {
+        console.log(e.message)
+    }
+    return false
 }
 
 

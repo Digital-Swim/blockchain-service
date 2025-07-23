@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { appConfig } from '../config';
+import { appConfig } from '../config.js';
 
 export class CoinGeckoProvider {
     private readonly baseUrl = appConfig.coingecko.base;

@@ -1,5 +1,5 @@
 import { appConfig } from "../../config.js";
-import { BitcoinAddressInfo, BitcoinProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo } from "../../types/bitcoin.js";
+import { BitcoinAddressInfo, BitcoinProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo, BitcoinTransactionStatus } from "../../types/bitcoin.js";
 import { NetworkType } from "../../types/common.js";
 import { BlockcypherApiProvider } from "./api/blockcypher.js";
 import { BlockstreamApiProvider } from "./api/blockstream.js";
@@ -81,6 +81,9 @@ export class FallbackBitcoinProvider implements BitcoinProvider {
         return this.tryProviders('getTransaction', txid);
     }
 
+    getTransactionStatus(txid: string): Promise<BitcoinTransactionStatus> {
+        return this.tryProviders('getTransactionStatus', txid);
+    }
     getTransactionHex(txid: string): Promise<string> {
         return this.tryProviders('getTransactionHex', txid);
     }

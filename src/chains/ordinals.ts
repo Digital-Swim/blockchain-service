@@ -8,8 +8,9 @@ import { CommitTransactionParams, Inscription, RevelaTransactionParams } from ".
 import { getNetwork } from "../utils/common.js";
 import { BitcoinAddress } from "../wallets/bitcoin/address.js";
 import { Bitcoin } from "./bitcoin.js";
+import { constrainedMemory } from "process";
 
-export class Oridnals extends Bitcoin {
+export class Ordinals extends Bitcoin {
 
     constructor(network: NetworkType) {
         super(network)
@@ -55,7 +56,6 @@ export class Oridnals extends Bitcoin {
 
     }
 
-
     createReveal(params: RevelaTransactionParams): BitcoinTransactionResult {
 
         const { commitUTXO, from: fromAddress, to, inscription, key, fixedFee, feeRate } = params;
@@ -74,7 +74,7 @@ export class Oridnals extends Bitcoin {
 
         let fee = fixedFee ? fixedFee : 0;
 
-        let psbt = this.createPsbtObject(commitUTXO, output, redeem, witness, fixedFee, to!, from)
+        let psbt = this.createPsbtObject(commitUTXO, output, redeem, witness, fee, to!, from)
 
         if (fee === 0 && feeRate) {
             const size = psbt.extractTransaction().virtualSize();
@@ -89,6 +89,43 @@ export class Oridnals extends Bitcoin {
             fee
         };
 
+    }
+
+    async estimateFee(params: Omit<CommitTransactionParams, "fixedFee">): Promise<{ rate: number; fee: { commit: number, reveal: number }, amountToSendInCommit: number }[]> {
+
+        const { from: fromAddress, key, inscription, amountSats, feeRate } = params
+
+        const from = new BitcoinAddress({ address: fromAddress, key, network: this.network }, new BitcoinUtxoManager(this.fallBackBitcoinProvider));
+
+        const leafScript = this.compileInscriptionScript(inscription, from.getXOnlyPublicKey());
+        const scriptTree: Taptree = { output: leafScript };
+        const redeem = { output: leafScript, redeemVersion: LEAF_VERSION_TAPSCRIPT };
+
+        // Get address from tweaked pub key, Send bitcoin to this address from "from" address
+        const { address, output, witness } = from.getPaymentObject('p2tr', scriptTree, redeem);
+        const mockTxid = "f3b1a0c2d0d134be2b4b0e5c89258c7c4c5d2710a953f4f6e2db4c639a3fa66e";// "xx".repeat(32)
+        const mockCommmitUtxo = { txId: mockTxid, value: amountSats, vout: 0 }
+
+        // For reveal tx size 
+        let psbt = this.createPsbtObject(mockCommmitUtxo, output, redeem, witness, 0, address!, from)
+        const size = psbt.extractTransaction().virtualSize();
+
+        let revealTxFee = size * feeRate!;
+        let netRevealTxAmount = revealTxFee + amountSats
+
+        // Estimating commit cost 
+        let commitTxFee = await super.estimate({
+            from,
+            to: address!,
+            amountSats: netRevealTxAmount,
+            key,
+            feeRates: [feeRate!]
+        });
+
+
+        return commitTxFee?.map(({ rate, fee }) => {
+            return { rate, fee: { commit: fee, reveal: revealTxFee }, amountToSendInCommit: netRevealTxAmount }
+        })
     }
 
     private createPsbtObject(commitUTXO: BitcoinUtxo, output: any, redeem: any, witness: any, fee: number, to: string, from: BitcoinAddress) {

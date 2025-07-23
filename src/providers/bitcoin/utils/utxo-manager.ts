@@ -76,7 +76,6 @@ export class BitcoinUtxoManager implements UtxoManager {
     }
 
     async deleteUtxos(address: string): Promise<void> {
-        console.warn("deleting utxo for address ", address)
         const sql = `DELETE FROM utxos WHERE address = ?`;
         await db.query(sql, [address!]);
     }

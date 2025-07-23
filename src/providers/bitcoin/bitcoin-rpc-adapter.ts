@@ -5,7 +5,8 @@ import {
     BitcoinFeeEstimates,
     BitcoinMempoolInfo,
     BitcoinTransaction,
-    BitcoinUtxo
+    BitcoinUtxo,
+    BitcoinTransactionStatus
 } from "../../types/bitcoin";
 
 import { BitcoinRpcProvider } from "./rpc/bitcoin-rpc";
@@ -18,6 +19,7 @@ export class BitcoinRpcAdapter implements BitcoinProvider {
         this.rpc = rpc;
         this.walletName = walletName;
     }
+
     baseUrl?: string | undefined;
 
     async getBlockchainInfo(): Promise<any> {
@@ -45,6 +47,25 @@ export class BitcoinRpcAdapter implements BitcoinProvider {
 
     async getTransaction(txid: string): Promise<BitcoinTransaction> {
         return this.rpc.call("getrawtransaction", [txid, true]);
+    }
+
+    async getTransactionStatus(txid: string): Promise<BitcoinTransactionStatus> {
+        try {
+            const tx = await this.getTransaction(txid)
+
+            if (tx?.confirmations && tx.confirmations > 0) {
+                return "confirmed";
+            } else {
+                return "pending";
+            }
+        } catch {
+            try {
+                await this.rpc.call("getmempoolentry", [txid]);
+                return "pending";
+            } catch {
+                return "failed";
+            }
+        }
     }
 
     async getTransactionHex(txid: string): Promise<string> {
