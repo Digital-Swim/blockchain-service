@@ -37,9 +37,6 @@ export const verifyMessage = (
 ): boolean => {
     try {
         const signature = Buffer.from(signatureBase64, 'base64');
-
-        console.log(signature)
-        console.log(signature.length);
         let resolvedNetwork: bitcoin.Network;
         if (typeof network === 'string') {
             if (network === 'mainnet') {
