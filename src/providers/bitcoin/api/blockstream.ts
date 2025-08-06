@@ -39,6 +39,7 @@ export class BlockstreamApiProvider implements BitcoinProvider {
 
     async getAddressUtxos(address: string, includePending: boolean = false): Promise<BitcoinUtxo[]> {
 
+        try{
         const res = await axios.get(`${this.baseUrl}/address/${address}/utxo`);
 
         return res.data
@@ -51,7 +52,11 @@ export class BlockstreamApiProvider implements BitcoinProvider {
                 status: utxo.status.confirmed ? 'unspent' : 'pending',
                 address
             }) as BitcoinUtxo);
-
+        }
+        catch(e){
+            console.log("error in blockstram,")
+            throw e
+        }
     }
 
     async getBlockchainInfo(): Promise<any> {

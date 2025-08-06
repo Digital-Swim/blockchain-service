@@ -1,5 +1,5 @@
 import { appConfig } from "../../config.js";
-import { BitcoinAddressInfo, BitcoinProvider, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinTransaction, BitcoinUtxo, BitcoinTransactionStatus } from "../../types/bitcoin.js";
+import { BitcoinAddressInfo, BitcoinBlock, BitcoinFeeEstimates, BitcoinMempoolInfo, BitcoinProvider, BitcoinTransaction, BitcoinTransactionStatus, BitcoinUtxo } from "../../types/bitcoin.js";
 import { NetworkType } from "../../types/common.js";
 import { BlockcypherApiProvider } from "./api/blockcypher.js";
 import { BlockstreamApiProvider } from "./api/blockstream.js";
@@ -41,82 +41,85 @@ export class FallbackBitcoinProvider implements BitcoinProvider {
     private async tryProviders<T>(methodName: keyof BitcoinProvider, ...args: any[]): Promise<T> {
         let lastError: any;
         for (const provider of this.providers) {
+
             const method = provider[methodName];
             if (typeof method !== 'function') {
                 continue; // skip if method not implemented by this provider
             }
             try {
+                console.log(`Using fallback provider ${provider.constructor.name}`)
                 // @ts-ignore
-                const result: T = await method.apply(provider, args);
+                const result: T = await (method.apply(provider, args));
                 return result;
-            } catch (err) {
+            } catch (err: any) {
+                console.log("errror in fallbalc caught")
                 lastError = err;
-                console.warn(`[FallbackBitcoinProvider] ${String(methodName)} failed on provider ${provider.constructor.name}:`, err);
+                console.warn(`[FallbackBitcoinProvider] ${String(methodName)} failed on provider ${provider.constructor.name}:`, err.message);
             }
         }
         throw lastError || new Error(`All providers failed for method ${String(methodName)}`);
     }
 
-    getBlockchainInfo(): Promise<any> {
-        return this.tryProviders('getBlockchainInfo');
+    async getBlockchainInfo(): Promise<any> {
+        return await this.tryProviders('getBlockchainInfo');
     }
 
-    getBlockAtHeight(height: number): Promise<BitcoinBlock[]> {
-        return this.tryProviders('getBlockAtHeight', height);
+    async getBlockAtHeight(height: number): Promise<BitcoinBlock[]> {
+        return await this.tryProviders('getBlockAtHeight', height);
     }
 
-    getBlockByHash(hash: string): Promise<BitcoinBlock> {
-        return this.tryProviders('getBlockByHash', hash);
+    async getBlockByHash(hash: string): Promise<BitcoinBlock> {
+        return await this.tryProviders('getBlockByHash', hash);
     }
 
-    getBlockTxs(hash: string, txStart?: number): Promise<string[]> {
-        return this.tryProviders('getBlockTxs', hash, txStart);
+    async getBlockTxs(hash: string, txStart?: number): Promise<string[]> {
+        return await this.tryProviders('getBlockTxs', hash, txStart);
     }
 
-    getLatestBlockHash(): Promise<string> {
-        return this.tryProviders('getLatestBlockHash');
+    async getLatestBlockHash(): Promise<string> {
+        return await this.tryProviders('getLatestBlockHash');
     }
 
-    getTransaction(txid: string): Promise<BitcoinTransaction> {
-        return this.tryProviders('getTransaction', txid);
+    async getTransaction(txid: string): Promise<BitcoinTransaction> {
+        return await this.tryProviders('getTransaction', txid);
     }
 
-    getTransactionStatus(txid: string): Promise<BitcoinTransactionStatus> {
-        return this.tryProviders('getTransactionStatus', txid);
+    async getTransactionStatus(txid: string): Promise<BitcoinTransactionStatus> {
+        return await this.tryProviders('getTransactionStatus', txid);
     }
-    getTransactionHex(txid: string): Promise<string> {
-        return this.tryProviders('getTransactionHex', txid);
-    }
-
-    broadcastTransaction(rawTxHex: string): Promise<string> {
-        return this.tryProviders('broadcastTransaction', rawTxHex);
+    async getTransactionHex(txid: string): Promise<string> {
+        return await this.tryProviders('getTransactionHex', txid);
     }
 
-    getAddressInfo(address: string): Promise<BitcoinAddressInfo> {
-        return this.tryProviders('getAddressInfo', address);
+    async broadcastTransaction(rawTxHex: string): Promise<string> {
+        return await this.tryProviders('broadcastTransaction', rawTxHex);
     }
 
-    getAddressFull?(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]> {
-        return this.tryProviders('getAddressFull', address, limit, before);
+    async getAddressInfo(address: string): Promise<BitcoinAddressInfo> {
+        return await this.tryProviders('getAddressInfo', address);
     }
 
-    getAddressUtxos(address: string, includePending?: boolean): Promise<BitcoinUtxo[]> {
-        return this.tryProviders('getAddressUtxos', address, includePending);
+    async getAddressFull?(address: string, limit?: number, before?: string): Promise<BitcoinTransaction[]> {
+        return await this.tryProviders('getAddressFull', address, limit, before);
     }
 
-    getMempoolInfo?(): Promise<BitcoinMempoolInfo> {
-        return this.tryProviders('getMempoolInfo');
+    async getAddressUtxos(address: string, includePending?: boolean): Promise<BitcoinUtxo[]> {
+        return await this.tryProviders('getAddressUtxos', address, includePending);
     }
 
-    getFeeEstimates?(): Promise<BitcoinFeeEstimates> {
-        return this.tryProviders('getFeeEstimates');
+    async getMempoolInfo?(): Promise<BitcoinMempoolInfo> {
+        return await this.tryProviders('getMempoolInfo');
     }
 
-    getLatestBlock(): Promise<BitcoinBlock> {
+    async getFeeEstimates?(): Promise<BitcoinFeeEstimates> {
+        return await this.tryProviders('getFeeEstimates');
+    }
+
+    async getLatestBlock(): Promise<BitcoinBlock> {
         throw new Error("Method not implemented.");
     }
 
-    getBalance(address: string): Promise<number> {
+    async getBalance(address: string): Promise<number> {
         throw new Error("Method not implemented.");
     }
 

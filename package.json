@@ -22,6 +22,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
     "@cmdcode/buff-utils": "^2.0.0",
