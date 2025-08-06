@@ -1,8 +1,9 @@
 {
- "name": "@ranjit84/blockchain-service",
+  "name": "@ranjit84/blockchain-service",
   "version": "1.0.0",
   "description": "",
   "type": "module",
+  "repository": "https://github.com/Digital-Swim/blockchain-service",
   "scripts": {
     "build": "tsc",
     "prepare": "cpx package.json dist/ && cpx README.md dist/",
