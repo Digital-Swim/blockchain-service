@@ -30,7 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run prepare
-      - run: echo "@YOUR_GITHUB_USERNAME:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+      - run: echo "@ranjit84:registry=https://npm.pkg.github.com/" >> ~/.npmrc
       - run: cd dist && npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
